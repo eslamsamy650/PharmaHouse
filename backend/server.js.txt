@@ -1,0 +1,30 @@
+const express = require('express');
+const cors = require('cors');
+
+const app = express();
+const PORT = 3001; // backend على بورت مختلف عن React
+
+// عشان يقرأ JSON من body
+app.use(express.json());
+
+// CORS: يسمح بالطلبات من React
+app.use(cors({
+  origin: 'http://localhost:3000', // بورت React
+  methods: ['GET','POST']
+}));
+
+// Route تسجيل الدخول
+app.post('/api/auth/login', (req, res) => {
+    console.log('Login request:', req.body); // للتأكد إن البيانات وصلت
+    const { username, password } = req.body;
+
+    // تحقق تجريبي
+    if(username === 'admin' && password === '1234'){
+        return res.json({ success: true, message: 'Logged in!' });
+    }
+
+    res.status(401).json({ success: false, message: 'Invalid credentials' });
+});
+
+// شغل السيرفر
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
