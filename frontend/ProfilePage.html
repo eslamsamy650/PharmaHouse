@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PharmaCare | Pharmacy Profile</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --primary-light: rgba(108, 92, 231, 0.1);
+      --primary-dark: #5649c0;
+      --danger: #ff4757;
+      --danger-light: rgba(255, 71, 87, 0.1);
+      --warning: #ffa502;
+      --warning-light: rgba(255, 165, 2, 0.1);
+      --success: #2ed573;
+      --success-light: rgba(46, 213, 115, 0.1);
+      --info: #1e90ff;
+      --info-light: rgba(30, 144, 255, 0.1);
+      --dark: #2f3542;
+      --darker: #1e272e;
+      --light: #f8f9fa;
+      --gray: #a4b0be;
+      --gray-light: #dfe6e9;
+      --sidebar-width: 280px;
+      --transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+      --border-radius: 12px;
+      --border-radius-sm: 8px;
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.3);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #f1f5f9 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, var(--darker) 0%, var(--dark) 100%);
+      height: 100vh;
+      position: fixed;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+      z-index: 100;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+    
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .sidebar-header h2 {
+      color: white;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin: 0;
+      background: linear-gradient(90deg, #fff 0%, #a5b1c2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .sidebar-header img {
+      width: 36px;
+      height: 36px;
+      filter: brightness(0) invert(1);
+    }
+    
+    .sidebar-menu {
+      padding: 1rem 0;
+    }
+    
+    .menu-item {
+      padding: 0.85rem 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      margin: 0.25rem 0.5rem;
+      border-radius: var(--border-radius-sm);
+      transition: var(--transition);
+      color: rgba(255, 255, 255, 0.7);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      font-size: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .menu-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: var(--transition);
+    }
+    
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      transform: translateX(5px);
+    }
+    
+    .menu-item:hover::before {
+      left: 100%;
+    }
+    
+    .menu-item.active {
+      background: rgba(108, 92, 231, 0.2);
+      color: white;
+      font-weight: 600;
+      box-shadow: inset 0 0 10px rgba(108, 92, 231, 0.3);
+    }
+    
+    .menu-item.active::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: var(--primary);
+      border-radius: 0 4px 4px 0;
+    }
+    
+    .menu-item i {
+      margin-right: 0.75rem;
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+    
+    /* Main Content */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 2rem;
+      transition: var(--transition);
+      min-height: 100vh;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      background: var(--glass-bg);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+    }
+    
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .page-title h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--info) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-title i {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+    
+    .user-info {
+      background: linear-gradient(90deg, var(--primary-light) 0%, var(--info-light) 100%);
+      padding: 0.5rem 1rem 0.5rem 0.75rem;
+      border-radius: 50px;
+      color: var(--primary-dark);
+      font-weight: 600;
+      border: 1px solid rgba(108, 92, 231, 0.2);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .user-info:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.1);
+    }
+    
+    /* Profile Content */
+    .profile-container {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+    }
+    
+    .profile-sidebar {
+      background: var(--glass-bg);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      height: fit-content;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .profile-sidebar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%, rgba(108, 92, 231, 0.05) 0%, transparent 70%);
+      z-index: -1;
+    }
+    
+    .profile-avatar {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .avatar-container {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: white;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+    }
+    
+    .avatar:hover {
+      transform: scale(1.05);
+    }
+    
+    .avatar-status {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      background: var(--success);
+      border-radius: 50%;
+      border: 3px solid white;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .profile-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+    }
+    
+    .profile-role {
+      color: var(--gray);
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .profile-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-item {
+      text-align: center;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: var(--border-radius-sm);
+      transition: var(--transition);
+    }
+    
+    .stat-item:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: block;
+    }
+    
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--gray);
+      margin-top: 0.5rem;
+    }
+    
+    .profile-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: var(--border-radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      transition: var(--transition);
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .btn-outline {
+      background: var(--glass-bg);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger) 0%, #ff6b81 100%);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    /* Profile Details */
+    .profile-details {
+      background: var(--glass-bg);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .profile-details::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 80% 20%, rgba(30, 144, 255, 0.05) 0%, transparent 70%);
+      z-index: -1;
+    }
+    
+    .details-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .details-header h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .details-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .tab-btn {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      color: var(--gray);
+    }
+    
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .tab-btn:hover:not(.active) {
+      background: rgba(108, 92, 231, 0.1);
+      color: var(--primary);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .info-item {
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: var(--border-radius-sm);
+      border-left: 4px solid var(--primary);
+      transition: var(--transition);
+    }
+    
+    .info-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .info-label {
+      font-size: 0.85rem;
+      color: var(--gray);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .info-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    /* Order History */
+    .order-history {
+      margin-top: 2rem;
+    }
+    
+    .order-item {
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: var(--border-radius-sm);
+      margin-bottom: 1rem;
+      border-left: 4px solid var(--info);
+      transition: var(--transition);
+    }
+    
+    .order-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .order-id {
+      font-weight: 600;
+      color: var(--dark);
+      font-size: 1.1rem;
+    }
+    
+    .order-status {
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .status-delivered {
+      background: var(--success-light);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+    
+    .status-pending {
+      background: var(--warning-light);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+    }
+    
+    .status-cancelled {
+      background: var(--danger-light);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+    
+    .order-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      color: var(--gray);
+      font-size: 0.95rem;
+    }
+    
+    .order-detail strong {
+      color: var(--dark);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .profile-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .profile-sidebar {
+        order: 2;
+      }
+      
+      .profile-details {
+        order: 1;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .menu-toggle {
+        display: block !important;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 1rem;
+      }
+      
+      .profile-sidebar,
+      .profile-details {
+        padding: 1.5rem;
+      }
+      
+      .details-tabs {
+        flex-wrap: wrap;
+      }
+      
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .order-details {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .menu-toggle {
+      display: none;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--border-radius-sm);
+      font-size: 1.2rem;
+      cursor: pointer;
+      margin-right: 1rem;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+    }
+    
+    .menu-toggle:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(108, 92, 231, 0.3);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Footer */
+    .footer {
+      margin-top: 3rem;
+      text-align: center;
+      color: var(--gray);
+      font-size: 0.9rem;
+      padding: 1rem;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    /* Password Change Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(5px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      animation: slideUp 0.3s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .modal-header h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--gray);
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+
+    .modal-close:hover {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .modal-body {
+      margin-bottom: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.75rem;
+      font-weight: 500;
+      color: var(--dark);
+      font-size: 0.95rem;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--gray-light);
+      border-radius: var(--border-radius-sm);
+      font-size: 1rem;
+      transition: var(--transition);
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+      background: white;
+    }
+
+    .password-strength {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .password-strength.weak {
+      color: var(--danger);
+    }
+
+    .password-strength.medium {
+      color: var(--warning);
+    }
+
+    .password-strength.strong {
+      color: var(--success);
+    }
+
+    .password-requirements {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--primary-light);
+      border-radius: var(--border-radius-sm);
+      font-size: 0.85rem;
+      color: var(--dark);
+    }
+
+    .password-requirements ul {
+      margin: 0.5rem 0 0 1.5rem;
+      padding: 0;
+    }
+
+    .password-requirements li {
+      margin-bottom: 0.25rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+
+    .error-message {
+      background: var(--danger-light);
+      color: var(--danger);
+      padding: 1rem;
+      border-radius: var(--border-radius-sm);
+      margin-bottom: 1rem;
+      display: none;
+      border-left: 4px solid var(--danger);
+    }
+
+    .error-message.show {
+      display: block;
+      animation: shake 0.5s ease;
+    }
+
+    .success-message {
+      background: var(--success-light);
+      color: var(--success);
+      padding: 1rem;
+      border-radius: var(--border-radius-sm);
+      margin-bottom: 1rem;
+      display: none;
+      border-left: 4px solid var(--success);
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .sidebar-header {
+      animation: float 4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <img src="https://cdn-icons-png.flaticon.com/512/3952/3952026.png" alt="Pharmacy Icon">
+      <h2>PharmaCare</h2>
+    </div>
+  <div class="sidebar-menu">
+      <div class="menu-item" onclick="window.location.href='dashboard.html'">
+        <i class="fas fa-chart-line"></i> Dashboard
+      </div>
+        <div class="menu-item active" onclick="window.location.href='ProfilePage.html'">
+        <i class="fas fa-box-open"></i> Pharmacy Profile
+      </div>
+      <div class="menu-item" id="inventory-menu-item" onclick="window.location.href='inventory.html'">
+        <i class="fas fa-pills"></i> Inventory
+      </div>
+     
+        <div class="menu-item" onclick="window.location.href='SpecialOffers.html'">
+        <i class="fas fa-credit-card"></i> Pharmacy Offers
+      </div>
+      <div class="menu-item" onclick="window.location.href='orders.html'">
+        <i class="fas fa-box-open"></i> Orders
+      </div>
+      
+      <div class="menu-item" onclick="window.location.href='payments.html'">
+        <i class="fas fa-credit-card"></i> Payments
+      </div>
+  
+      <div class="menu-item" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="header">
+      <button class="menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="page-title">
+        <i class="fas fa-store"></i>
+        <h1>Pharmacy Profile</h1>
+      </div>
+      <div class="user-info">
+        <i class="fas fa-user-shield"></i>
+        <span id="user-info-name">Loading...</span>
+      </div>
+    </div>
+
+    <div class="profile-container">
+      <div class="profile-sidebar">
+        <div class="profile-avatar">
+          <div class="avatar-container">
+            <div class="avatar">
+              <i class="fas fa-heartbeat"></i>
+            </div>
+            <div class="avatar-status"></div>
+          </div>
+          <div class="profile-name" id="profile-name">Loading...</div>
+          <div class="profile-role" id="profile-role">Loading...</div>
+        </div>
+        
+        <div class="profile-stats">
+          <div class="stat-item">
+            <span class="stat-value" id="stat-medicines">0</span>
+            <div class="stat-label">Medicines</div>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="stat-orders-month">0</span>
+            <div class="stat-label">Orders This Month</div>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="stat-satisfaction">N/A</span>
+            <div class="stat-label">Satisfaction Rate</div>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="stat-total-orders">0</span>
+            <div class="stat-label">Total Orders</div>
+          </div>
+        </div>
+        
+        <div class="profile-actions">
+          <button class="btn btn-primary" onclick="editProfile()">
+            <i class="fas fa-edit"></i> Edit Profile
+          </button>
+          <button class="btn btn-outline" onclick="changePassword()">
+            <i class="fas fa-key"></i> Change Password
+          </button>
+          <button class="btn btn-danger" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
+      </div>
+
+      <div class="profile-details">
+        <div class="details-header">
+          <h2><i class="fas fa-info-circle"></i> Pharmacy Information</h2>
+        </div>
+        
+        <div class="details-tabs">
+          <button class="tab-btn active" onclick="showTab('basic-info')">Basic Information</button>
+          <button class="tab-btn" onclick="showTab('contact-info')">Contact Details</button>
+          <button class="tab-btn" onclick="showTab('order-history')">Order History</button>
+        </div>
+        
+        <div id="basic-info" class="tab-content active">
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">
+                <i class="fas fa-store"></i> Pharmacy Name
+              </div>
+              <div class="info-value" id="info-pharmacy-name">Loading...</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">
+                <i class="fas fa-id-card"></i> License Number
+              </div>
+              <div class="info-value" id="info-license-number">Loading...</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">
+                <i class="fas fa-user-md"></i> Owner
+              </div>
+              <div class="info-value" id="info-owner">Loading...</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">
+                <i class="fas fa-calendar-alt"></i> Established
+              </div>
+              <div class="info-value" id="info-established">N/A</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">
+                <i class="fas fa-clock"></i> Operating Hours
+              </div>
+              <div class="info-value" id="info-operating-hours">Loading...</div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="contact-info" class="tab-content">
+          <div class="info-grid">
+            <div class="info-item">
+              <div class="info-label">
+                <i class="fas fa-map-marker-alt"></i> Address
+              </div>
+              <div class="info-value" id="info-address">Loading...</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">
+                <i class="fas fa-phone"></i> Phone
+              </div>
+              <div class="info-value" id="info-phone">Loading...</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">
+                <i class="fas fa-envelope"></i> Email
+              </div>
+              <div class="info-value" id="info-email">Loading...</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">
+                <i class="fas fa-globe"></i> Website
+              </div>
+              <div class="info-value" id="info-website">N/A</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">
+                <i class="fab fa-facebook"></i> Social Media
+              </div>
+              <div class="info-value" id="info-social-media">N/A</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">
+                <i class="fas fa-ambulance"></i> Delivery Service
+              </div>
+              <div class="info-value" id="info-delivery-service">N/A</div>
+            </div>
+          </div>
+        </div>
+        
+        <div id="order-history" class="tab-content">
+          <div class="order-history" id="order-history-list">
+            <!-- Orders will be loaded dynamically -->
+            <p style="text-align: center; color: var(--gray); padding: 2rem;">Loading order history...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>© 2023 PharmaCare Pharmacy Management System | All Rights Reserved</p>
+    </div>
+  </div>
+
+  <!-- Password Change Modal -->
+  <div class="modal-overlay" id="password-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2><i class="fas fa-key"></i> Change Password</h2>
+        <button class="modal-close" onclick="closePasswordModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="error-message" id="password-error"></div>
+        <div class="success-message" id="password-success"></div>
+        
+        <form id="password-change-form" onsubmit="handlePasswordChange(event)">
+          <div class="form-group">
+            <label for="current-password">
+              <i class="fas fa-lock"></i> Current Password
+            </label>
+            <input 
+              type="password" 
+              id="current-password" 
+              required 
+              placeholder="Enter your current password"
+              autocomplete="current-password"
+            >
+          </div>
+          
+          <div class="form-group">
+            <label for="new-password">
+              <i class="fas fa-key"></i> New Password
+            </label>
+            <input 
+              type="password" 
+              id="new-password" 
+              required 
+              placeholder="Enter your new password"
+              autocomplete="new-password"
+              oninput="checkPasswordStrength()"
+              minlength="6"
+            >
+            <div class="password-strength" id="password-strength"></div>
+          </div>
+          
+          <div class="form-group">
+            <label for="confirm-password">
+              <i class="fas fa-check-circle"></i> Confirm New Password
+            </label>
+            <input 
+              type="password" 
+              id="confirm-password" 
+              required 
+              placeholder="Confirm your new password"
+              autocomplete="new-password"
+              oninput="checkPasswordMatch()"
+            >
+            <div class="password-strength" id="password-match" style="margin-top: 0.5rem;"></div>
+          </div>
+          
+          <div class="password-requirements">
+            <strong>Password Requirements:</strong>
+            <ul>
+              <li>At least 6 characters long</li>
+              <li>Must be different from your current password</li>
+              <li>Recommended: Mix of letters, numbers, and special characters</li>
+            </ul>
+          </div>
+          
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closePasswordModal()">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" id="submit-password-btn">
+              <i class="fas fa-save"></i> Change Password
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="./assets/js/api.js"></script>
+  <script>
+    const pharmacy = JSON.parse(localStorage.getItem('pharmacy'));
+    if (!pharmacy || !localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+    }
+
+    let userProfile = null;
+    let pharmacyInfo = null;
+    let userOrders = [];
+
+    // Load user role and hide inventory menu for normal users
+    async function loadUserRole() {
+      try {
+        const profile = await profileAPI.get();
+        if (profile && profile.user) {
+          const userRole = profile.user.Role || '';
+          const isAdmin = userRole === 'admin';
+          
+          // Hide inventory menu item for normal users
+          const inventoryMenuItem = document.getElementById('inventory-menu-item');
+          if (inventoryMenuItem) {
+            inventoryMenuItem.style.display = isAdmin ? 'flex' : 'none';
+          }
+        }
+      } catch (error) {
+      }
+    }
+
+    // Load profile data
+    async function loadProfile() {
+      try {
+        const data = await profileAPI.get();
+        userProfile = data.user;
+        pharmacyInfo = data.pharmacy;
+        const stats = data.stats || {};
+        
+        
+        // Update header
+        const userNameEl = document.getElementById('user-info-name');
+        if (userNameEl) {
+          userNameEl.textContent = pharmacyInfo?.Name || userProfile?.FullName || userProfile?.Username || 'User';
+        }
+        
+        // Update profile sidebar
+        const profileNameEl = document.getElementById('profile-name');
+        if (profileNameEl) {
+          profileNameEl.textContent = pharmacyInfo?.Name || userProfile?.FullName || userProfile?.Username || 'Pharmacy';
+        }
+        
+        const profileRoleEl = document.getElementById('profile-role');
+        if (profileRoleEl) {
+          if (pharmacyInfo) {
+            // Calculate years since registration (approximate)
+            const registrationYear = new Date().getFullYear();
+            profileRoleEl.textContent = `Licensed Pharmacy Since ${registrationYear}`;
+          } else {
+            profileRoleEl.textContent = userProfile?.Role ? userProfile.Role.charAt(0).toUpperCase() + userProfile.Role.slice(1) : 'User';
+          }
+        }
+        
+        // Update basic info tab
+        updateBasicInfo();
+        
+        // Update contact info tab
+        updateContactInfo();
+        
+        // Update stats
+        updateStats(stats);
+        
+        // Load orders for order history
+        await loadOrderHistory();
+      } catch (error) {
+        // Fallback to localStorage data
+        if (pharmacy) {
+          const profileNameEl = document.getElementById('profile-name');
+          if (profileNameEl) {
+            profileNameEl.textContent = pharmacy.username || pharmacy.fullName || 'User';
+          }
+        }
+      }
+    }
+
+    function updateBasicInfo() {
+      console.log('Updating basic info with pharmacyInfo:', pharmacyInfo);
+      
+      // Update pharmacy name
+      const pharmacyNameEl = document.getElementById('info-pharmacy-name');
+      if (pharmacyNameEl) {
+        pharmacyNameEl.textContent = pharmacyInfo?.Name || userProfile?.Username || 'N/A';
+      }
+      
+      // Update owner (from user FullName)
+      const ownerEl = document.getElementById('info-owner');
+      if (ownerEl) {
+        ownerEl.textContent = userProfile?.FullName || userProfile?.Username || 'N/A';
+      }
+      
+      // License number - from database
+      const licenseEl = document.getElementById('info-license-number');
+      if (licenseEl) {
+        // Check all possible field name variations
+        const licenseNumber = pharmacyInfo?.LicenseNumber || 
+                              pharmacyInfo?.licenseNumber || 
+                              pharmacyInfo?.License_Number ||
+                              (pharmacyInfo && pharmacyInfo['LicenseNumber']) ||
+                              null;
+        
+        if (licenseNumber !== null && licenseNumber !== undefined && licenseNumber !== '') {
+          licenseEl.textContent = String(licenseNumber);
+        } else {
+          licenseEl.textContent = 'N/A';
+        }
+      }
+      
+      // Established date - from database
+      const establishedEl = document.getElementById('info-established');
+      if (establishedEl) {
+        // Check all possible field name variations
+        const establishedDate = pharmacyInfo?.EstablishedDate || 
+                                pharmacyInfo?.establishedDate || 
+                                pharmacyInfo?.Established_Date ||
+                                (pharmacyInfo && pharmacyInfo['EstablishedDate']) ||
+                                null;
+        
+        if (establishedDate) {
+          // Format the date for display (YYYY-MM-DD to readable format)
+          try {
+            const date = new Date(establishedDate);
+            if (!isNaN(date.getTime())) {
+              // Format as: Month Day, Year (e.g., January 15, 2020)
+              const options = { year: 'numeric', month: 'long', day: 'numeric' };
+              establishedEl.textContent = date.toLocaleDateString('en-US', options);
+            } else {
+              establishedEl.textContent = establishedDate; // Fallback to raw value
+            }
+          } catch (e) {
+            establishedEl.textContent = establishedDate; // Fallback to raw value
+          }
+        } else {
+          establishedEl.textContent = 'N/A';
+        }
+      }
+      
+      // Operating hours - from database
+      const hoursEl = document.getElementById('info-operating-hours');
+      if (hoursEl) {
+        // Check all possible field name variations
+        const operatingHours = pharmacyInfo?.OperatingHours || 
+                               pharmacyInfo?.operatingHours || 
+                               pharmacyInfo?.Operating_Hours ||
+                               (pharmacyInfo && pharmacyInfo['OperatingHours']) ||
+                               null;
+        console.log('Operating Hours from pharmacyInfo:', operatingHours);
+        console.log('Full pharmacyInfo keys:', pharmacyInfo ? Object.keys(pharmacyInfo) : 'null');
+        console.log('Full pharmacyInfo:', pharmacyInfo);
+        
+        if (operatingHours !== null && operatingHours !== undefined && operatingHours !== '') {
+          hoursEl.textContent = String(operatingHours);
+        } else {
+          hoursEl.textContent = 'N/A';
+        }
+      }
+    }
+
+    function updateContactInfo() {
+      // Update address
+      const addressEl = document.getElementById('info-address');
+      if (addressEl) {
+        addressEl.textContent = pharmacyInfo?.Address || 'N/A';
+      }
+      
+      // Update phone
+      const phoneEl = document.getElementById('info-phone');
+      if (phoneEl) {
+        phoneEl.textContent = pharmacyInfo?.Phone || 'N/A';
+      }
+      
+      // Update email
+      const emailEl = document.getElementById('info-email');
+      if (emailEl) {
+        emailEl.textContent = pharmacyInfo?.Email || userProfile?.Email || 'N/A';
+      }
+      
+      // Website
+      const websiteEl = document.getElementById('info-website');
+      if (websiteEl) {
+        websiteEl.textContent = pharmacyInfo?.Website || 'N/A';
+      }
+      
+      // Social media
+      const socialEl = document.getElementById('info-social-media');
+      if (socialEl) {
+        socialEl.textContent = pharmacyInfo?.SocialMedia || 'N/A';
+      }
+      
+      // Delivery service
+      const deliveryEl = document.getElementById('info-delivery-service');
+      if (deliveryEl) {
+        deliveryEl.textContent = pharmacyInfo?.DeliveryService || pharmacyInfo?.Address || 'N/A';
+      }
+    }
+    
+    function updateStats(stats) {
+      const medicinesEl = document.getElementById('stat-medicines');
+      if (medicinesEl) {
+        medicinesEl.textContent = stats.TotalMedicines || 0;
+      }
+      
+      const ordersMonthEl = document.getElementById('stat-orders-month');
+      if (ordersMonthEl) {
+        ordersMonthEl.textContent = stats.OrdersThisMonth || 0;
+      }
+      
+      const totalOrdersEl = document.getElementById('stat-total-orders');
+      if (totalOrdersEl) {
+        totalOrdersEl.textContent = stats.TotalOrders || 0;
+      }
+      
+      // Satisfaction rate - not calculated, show N/A
+      const satisfactionEl = document.getElementById('stat-satisfaction');
+      if (satisfactionEl) {
+        satisfactionEl.textContent = 'N/A';
+      }
+    }
+
+    async function loadOrderHistory() {
+      try {
+        userOrders = await ordersAPI.getAll();
+        renderOrderHistory();
+      } catch (error) {
+        userOrders = [];
+      }
+    }
+
+    function renderOrderHistory() {
+      const orderList = document.getElementById('order-history-list');
+      if (!orderList) return;
+      
+      orderList.innerHTML = '';
+      
+      if (!userOrders || userOrders.length === 0) {
+        orderList.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 2rem;">No orders found</p>';
+        return;
+      }
+      
+      // Show all orders (or limit to recent 10)
+      userOrders.slice(0, 10).forEach(order => {
+        const orderDate = order.OrderDate ? new Date(order.OrderDate).toLocaleDateString() : 'N/A';
+        const invoiceDate = order.InvoiceDate ? new Date(order.InvoiceDate).toLocaleDateString() : 'N/A';
+        const paymentStatus = order.PaymentStatus || 'Pending';
+        const status = paymentStatus === 'completed' || paymentStatus === 'Paid' ? 'delivered' : 
+                      paymentStatus === 'Pending' ? 'pending' : 'cancelled';
+        
+        const orderEl = document.createElement('div');
+        orderEl.className = 'order-item';
+        orderEl.innerHTML = `
+          <div class="order-header">
+            <div class="order-id">Order #${order.OrderID || 'N/A'}</div>
+            <div class="order-status status-${status}">${formatOrderStatus(status)}</div>
+          </div>
+          <div class="order-details">
+            <div class="order-detail"><strong>Date:</strong> ${orderDate}</div>
+            <div class="order-detail"><strong>Total:</strong> $${parseFloat(order.TotalAmount || 0).toFixed(2)}</div>
+            <div class="order-detail"><strong>Pharmacy:</strong> ${order.PharmacyName || pharmacyInfo?.Name || 'N/A'}</div>
+            <div class="order-detail"><strong>Payment Status:</strong> ${paymentStatus}</div>
+            ${invoiceDate !== 'N/A' ? `<div class="order-detail"><strong>Invoice Date:</strong> ${invoiceDate}</div>` : ''}
+          </div>
+        `;
+        orderList.appendChild(orderEl);
+      });
+    }
+
+    function formatOrderStatus(status) {
+      const statusMap = {
+        'delivered': 'Delivered',
+        'pending': 'Processing',
+        'cancelled': 'Cancelled'
+      };
+      return statusMap[status] || status;
+    }
+
+
+    // Tab navigation functionality
+    function showTab(tabId) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Remove active class from all tab buttons
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Show the selected tab
+      document.getElementById(tabId).classList.add('active');
+      
+      // Add active class to clicked button
+      event.target.classList.add('active');
+      
+      // Load order history if that tab is selected
+      if (tabId === 'order-history') {
+        loadOrderHistory();
+      }
+    }
+    
+    // Toggle sidebar on mobile
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('active');
+    }
+    
+    function editProfile() {
+      // Create a modal for editing profile
+      const modal = document.createElement('div');
+      modal.id = 'edit-profile-modal';
+      modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;';
+      
+      const form = document.createElement('div');
+      form.style.cssText = 'background: white; padding: 2rem; border-radius: 12px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;';
+      form.innerHTML = `
+        <h2 style="margin-bottom: 1.5rem;">Edit Pharmacy Profile</h2>
+        <form id="edit-profile-form">
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Owner (Full Name)</label>
+            <input type="text" id="edit-owner" value="${userProfile?.FullName || ''}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">License Number</label>
+            <input type="text" id="edit-licenseNumber" value="${pharmacyInfo?.LicenseNumber || ''}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Operating Hours</label>
+            <input type="text" id="edit-operatingHours" value="${pharmacyInfo?.OperatingHours || ''}" placeholder="e.g., Mon-Fri: 9:00 AM - 6:00 PM" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Established Date</label>
+            <input type="date" id="edit-establishedDate" value="${pharmacyInfo?.EstablishedDate ? new Date(pharmacyInfo.EstablishedDate).toISOString().split('T')[0] : ''}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Email</label>
+            <input type="email" id="edit-email" value="${userProfile?.Email || ''}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Address</label>
+            <input type="text" id="edit-address" value="${pharmacyInfo?.Address || ''}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Phone</label>
+            <input type="text" id="edit-phone" value="${pharmacyInfo?.Phone || ''}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Website</label>
+            <input type="url" id="edit-website" value="${pharmacyInfo?.Website || ''}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Social Media</label>
+            <input type="text" id="edit-socialMedia" value="${pharmacyInfo?.SocialMedia || ''}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Delivery Service (Address)</label>
+            <input type="text" id="edit-deliveryService" value="${pharmacyInfo?.DeliveryService || pharmacyInfo?.Address || ''}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px;">
+          </div>
+          <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+            <button type="button" id="cancel-edit-profile-btn" style="padding: 0.75rem 1.5rem; background: #f5f5f5; border: none; border-radius: 8px; cursor: pointer;">Cancel</button>
+            <button type="submit" style="padding: 0.75rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">Save</button>
+          </div>
+        </form>
+      `;
+      
+      modal.appendChild(form);
+      document.body.appendChild(modal);
+      
+      // Add event listener for cancel button
+      const cancelBtn = form.querySelector('#cancel-edit-profile-btn');
+      cancelBtn.addEventListener('click', () => {
+        modal.remove();
+      });
+      
+      // Close modal when clicking outside
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      });
+      
+      form.querySelector('#edit-profile-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Get values - keep empty strings as empty strings, don't convert to null
+        const fullNameValue = document.getElementById('edit-owner').value.trim();
+        const emailValue = document.getElementById('edit-email').value.trim();
+        const addressValue = document.getElementById('edit-address').value.trim();
+        const phoneValue = document.getElementById('edit-phone').value.trim();
+        const websiteValue = document.getElementById('edit-website').value.trim();
+        const socialMediaValue = document.getElementById('edit-socialMedia').value.trim();
+        const deliveryServiceValue = document.getElementById('edit-deliveryService').value.trim();
+        const licenseNumberValue = document.getElementById('edit-licenseNumber').value.trim();
+        const operatingHoursValue = document.getElementById('edit-operatingHours').value.trim();
+        const establishedDateValue = document.getElementById('edit-establishedDate').value.trim();
+        
+        const updateData = {
+          fullName: fullNameValue || null,
+          email: emailValue || null,
+          address: addressValue || null,
+          phone: phoneValue || null,
+          website: websiteValue || null,
+          socialMedia: socialMediaValue || null,
+          deliveryService: deliveryServiceValue || null,
+          licenseNumber: licenseNumberValue || null,
+          operatingHours: operatingHoursValue || null,
+          establishedDate: establishedDateValue || null
+        };
+        
+        
+        try {
+          await profileAPI.update(updateData);
+          alert('Profile updated successfully!');
+          modal.remove();
+          loadProfile();
+        } catch (error) {
+          alert('Error updating profile: ' + (error.message || 'Please try again'));
+        }
+      });
+    }
+    
+    function changePassword() {
+      const modal = document.getElementById('password-modal');
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      // Clear form
+      document.getElementById('password-change-form').reset();
+      document.getElementById('password-error').classList.remove('show');
+      document.getElementById('password-success').classList.remove('show');
+      document.getElementById('password-strength').textContent = '';
+      document.getElementById('password-match').textContent = '';
+    }
+
+    function closePasswordModal() {
+      const modal = document.getElementById('password-modal');
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      
+      // Clear form
+      document.getElementById('password-change-form').reset();
+      document.getElementById('password-error').classList.remove('show');
+      document.getElementById('password-success').classList.remove('show');
+      document.getElementById('password-strength').textContent = '';
+      document.getElementById('password-match').textContent = '';
+    }
+
+    function checkPasswordStrength() {
+      const password = document.getElementById('new-password').value;
+      const strengthEl = document.getElementById('password-strength');
+      
+      if (password.length === 0) {
+        strengthEl.textContent = '';
+        strengthEl.className = 'password-strength';
+        return;
+      }
+      
+      let strength = 0;
+      let strengthText = '';
+      let strengthClass = '';
+      
+      if (password.length >= 6) strength++;
+      if (password.length >= 8) strength++;
+      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+      if (/\d/.test(password)) strength++;
+      if (/[^a-zA-Z\d]/.test(password)) strength++;
+      
+      if (strength <= 2) {
+        strengthText = 'Weak password';
+        strengthClass = 'weak';
+      } else if (strength <= 3) {
+        strengthText = 'Medium password';
+        strengthClass = 'medium';
+      } else {
+        strengthText = 'Strong password';
+        strengthClass = 'strong';
+      }
+      
+      strengthEl.textContent = strengthText;
+      strengthEl.className = `password-strength ${strengthClass}`;
+    }
+
+    function checkPasswordMatch() {
+      const newPassword = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      const matchEl = document.getElementById('password-match');
+      
+      if (confirmPassword.length === 0) {
+        matchEl.textContent = '';
+        matchEl.className = 'password-strength';
+        return;
+      }
+      
+      if (newPassword === confirmPassword) {
+        matchEl.textContent = '✓ Passwords match';
+        matchEl.className = 'password-strength strong';
+      } else {
+        matchEl.textContent = '✗ Passwords do not match';
+        matchEl.className = 'password-strength weak';
+      }
+    }
+
+    async function handlePasswordChange(event) {
+      event.preventDefault();
+      
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      
+      const errorEl = document.getElementById('password-error');
+      const successEl = document.getElementById('password-success');
+      const submitBtn = document.getElementById('submit-password-btn');
+      
+      // Hide previous messages
+      errorEl.classList.remove('show');
+      successEl.classList.remove('show');
+      
+      // Validation
+      if (newPassword.length < 6) {
+        errorEl.textContent = 'New password must be at least 6 characters long';
+        errorEl.classList.add('show');
+        return;
+      }
+      
+      if (newPassword !== confirmPassword) {
+        errorEl.textContent = 'New password and confirmation do not match';
+        errorEl.classList.add('show');
+        return;
+      }
+      
+      if (currentPassword === newPassword) {
+        errorEl.textContent = 'New password must be different from current password';
+        errorEl.classList.add('show');
+        return;
+      }
+      
+      // Disable submit button
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Changing...';
+      
+      try {
+        await authAPI.changePassword(currentPassword, newPassword, confirmPassword);
+        
+        // Show success message
+        successEl.textContent = 'Password changed successfully!';
+        successEl.classList.add('show');
+        
+        // Clear form
+        document.getElementById('password-change-form').reset();
+        document.getElementById('password-strength').textContent = '';
+        document.getElementById('password-match').textContent = '';
+        
+        // Close modal after 2 seconds
+        setTimeout(() => {
+          closePasswordModal();
+        }, 2000);
+        
+      } catch (error) {
+        errorEl.textContent = error.message || 'Failed to change password. Please try again.';
+        errorEl.classList.add('show');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Change Password';
+      }
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function(event) {
+      const modal = document.getElementById('password-modal');
+      if (event.target === modal) {
+        closePasswordModal();
+      }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        const modal = document.getElementById('password-modal');
+        if (modal.classList.contains('active')) {
+          closePasswordModal();
+        }
+      }
+    });
+    
+    function logout() {
+      if(confirm('Are you sure you want to logout?')) {
+        if (typeof authAPI !== 'undefined') {
+          authAPI.logout();
+        } else {
+          localStorage.removeItem('pharmacy');
+          localStorage.removeItem('token');
+          localStorage.removeItem('isAuthenticated');
+        }
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Load user role and profile on page load
+    loadUserRole();
+    loadProfile();
+  </script>
+</body>
+</html>

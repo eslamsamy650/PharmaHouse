@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PharmaCare | Special Offers</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --primary-light: rgba(108, 92, 231, 0.1);
+      --primary-dark: #5649c0;
+      --danger: #ff4757;
+      --danger-light: rgba(255, 71, 87, 0.1);
+      --warning: #ffa502;
+      --warning-light: rgba(255, 165, 2, 0.1);
+      --success: #2ed573;
+      --success-light: rgba(46, 213, 115, 0.1);
+      --info: #1e90ff;
+      --info-light: rgba(30, 144, 255, 0.1);
+      --dark: #2f3542;
+      --darker: #1e272e;
+      --light: #f8f9fa;
+      --gray: #a4b0be;
+      --gray-light: #dfe6e9;
+      --sidebar-width: 280px;
+      --transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+      --border-radius: 12px;
+      --border-radius-sm: 8px;
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.3);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #f1f5f9 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, var(--darker) 0%, var(--dark) 100%);
+      height: 100vh;
+      position: fixed;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+      z-index: 100;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+    
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .sidebar-header h2 {
+      color: white;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin: 0;
+      background: linear-gradient(90deg, #fff 0%, #a5b1c2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .sidebar-header img {
+      width: 36px;
+      height: 36px;
+      filter: brightness(0) invert(1);
+    }
+    
+    .sidebar-menu {
+      padding: 1rem 0;
+    }
+    
+    .menu-item {
+      padding: 0.85rem 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      margin: 0.25rem 0.5rem;
+      border-radius: var(--border-radius-sm);
+      transition: var(--transition);
+      color: rgba(255, 255, 255, 0.7);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      font-size: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .menu-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: var(--transition);
+    }
+    
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      transform: translateX(5px);
+    }
+    
+    .menu-item:hover::before {
+      left: 100%;
+    }
+    
+    .menu-item.active {
+      background: rgba(108, 92, 231, 0.2);
+      color: white;
+      font-weight: 600;
+      box-shadow: inset 0 0 10px rgba(108, 92, 231, 0.3);
+    }
+    
+    .menu-item.active::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: var(--primary);
+      border-radius: 0 4px 4px 0;
+    }
+    
+    .menu-item i {
+      margin-right: 0.75rem;
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+    
+    /* Main Content */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 2rem;
+      transition: var(--transition);
+      min-height: 100vh;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      background: var(--glass-bg);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+    }
+    
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .page-title h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--info) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-title i {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+    
+    .user-info {
+      background: linear-gradient(90deg, var(--primary-light) 0%, var(--info-light) 100%);
+      padding: 0.5rem 1rem 0.5rem 0.75rem;
+      border-radius: 50px;
+      color: var(--primary-dark);
+      font-weight: 600;
+      border: 1px solid rgba(108, 92, 231, 0.2);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .user-info:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.1);
+    }
+    
+    /* Offers Content */
+    .offers-container {
+      background: var(--glass-bg);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .offers-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 80% 20%, rgba(30, 144, 255, 0.05) 0%, transparent 70%);
+      z-index: -1;
+    }
+    
+    .offers-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .offers-header h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .offers-filter {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    
+    .filter-select {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius-sm);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      color: var(--dark);
+      outline: none;
+    }
+    
+    /* Offers Grid */
+    .offers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    
+    .offer-card {
+      background: white;
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      border: 1px solid rgba(108, 92, 231, 0.1);
+    }
+    
+    .offer-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .offer-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: var(--danger);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      z-index: 2;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .offer-image {
+      height: 180px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e3e8ff 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    
+    .offer-image i {
+      font-size: 3.5rem;
+      color: var(--primary);
+      opacity: 0.7;
+    }
+    
+    .offer-details {
+      padding: 1.5rem;
+    }
+    
+    .offer-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+    }
+    
+    .offer-description {
+      color: var(--gray);
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+      min-height: 60px;
+    }
+    
+    .price-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .original-price {
+      color: var(--gray);
+      text-decoration: line-through;
+      font-size: 1rem;
+    }
+    
+    .discounted-price {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--success);
+    }
+    
+    .savings {
+      background: var(--success-light);
+      color: var(--success);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: inline-block;
+      margin-top: 0.5rem;
+      border: 1px solid var(--success);
+    }
+    
+    .offer-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      margin-top: 1rem;
+      border-top: 1px solid var(--gray-light);
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+    
+    .min-order {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .offer-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: var(--border-radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      transition: var(--transition);
+      text-decoration: none;
+      font-size: 0.95rem;
+      flex: 1;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .btn-outline {
+      background: var(--glass-bg);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    /* Bulk Discount Banner */
+    .bulk-discount-banner {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      color: var(--darker);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .banner-icon {
+      font-size: 3rem;
+      flex-shrink: 0;
+    }
+    
+    .banner-content h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+    
+    .banner-content p {
+      margin-bottom: 0.75rem;
+    }
+    
+    .banner-badge {
+      background: var(--danger);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: inline-block;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .menu-toggle {
+        display: block !important;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 1rem;
+      }
+      
+      .offers-container {
+        padding: 1.5rem;
+      }
+      
+      .bulk-discount-banner {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .offers-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .menu-toggle {
+      display: none;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--border-radius-sm);
+      font-size: 1.2rem;
+      cursor: pointer;
+      margin-right: 1rem;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+    }
+    
+    .menu-toggle:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(108, 92, 231, 0.3);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Footer */
+    .footer {
+      margin-top: 3rem;
+      text-align: center;
+      color: var(--gray);
+      font-size: 0.9rem;
+      padding: 1rem;
+      border-top: 1px solid var(--glass-border);
+    }
+    
+    .ribbon {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: var(--primary);
+      color: white;
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: var(--shadow-sm);
+      border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .sidebar-header {
+      animation: float 4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <img src="https://cdn-icons-png.flaticon.com/512/3952/3952026.png" alt="Pharmacy Icon">
+      <h2>PharmaCare</h2>
+    </div>
+    <div class="sidebar-menu">
+      <div class="menu-item" onclick="window.location.href='dashboard.html'">
+        <i class="fas fa-chart-line"></i> Dashboard
+      </div>
+        <div class="menu-item" onclick="window.location.href='ProfilePage.html'">
+        <i class="fas fa-user"></i> Pharmacy Profile
+      </div>
+      <div class="menu-item" id="inventory-menu-item" onclick="window.location.href='inventory.html'">
+        <i class="fas fa-pills"></i> Inventory
+      </div>
+       <div class="menu-item active" onclick="window.location.href='SpecialOffers.html'">
+        <i class="fas fa-credit-card"></i> Pharmacy Offers
+      </div>
+     
+      <div class="menu-item" onclick="window.location.href='orders.html'">
+        <i class="fas fa-box-open"></i> Orders
+      </div>
+      <div class="menu-item" onclick="window.location.href='payments.html'">
+        <i class="fas fa-credit-card"></i> Payments
+      </div>
+     
+     
+      
+      <div class="menu-item" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="header">
+      <button class="menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="page-title">
+        <i class="fas fa-tags"></i>
+        <h1>Special Offers</h1>
+      </div>
+      <div class="user-info">
+        <i class="fas fa-user-shield"></i>
+        <span>MedLife Pharmacy</span>
+      </div>
+    </div>
+
+    <div class="bulk-discount-banner">
+      <div class="banner-icon">
+        <i class="fas fa-boxes"></i>
+      </div>
+      <div class="banner-content">
+        <h3>Exclusive Bulk Order Discounts</h3>
+        <p>Save up to 35% when you order in larger quantities. These special offers are exclusively for our valued pharmacy partners.</p>
+        <div class="banner-badge">Minimum order: 50 units</div>
+      </div>
+    </div>
+
+    <div class="offers-container">
+      <div class="offers-header">
+        <h2><i class="fas fa-pills"></i> Discounted Products</h2>
+        <!-- Filters disabled as requested -->
+        <div class="offers-filter" style="display: none;">
+          <select class="filter-select" disabled>
+            <option>All Categories</option>
+            <option>Prescription Drugs</option>
+            <option>Over-the-Counter</option>
+            <option>Medical Supplies</option>
+            <option>Vitamins & Supplements</option>
+          </select>
+          <select class="filter-select" disabled>
+            <option>Sort By: Discount %</option>
+            <option>Sort By: Price Low-High</option>
+            <option>Sort By: Price High-Low</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="offers-grid" id="offers-grid">
+        <!-- Offers will be loaded dynamically -->
+        <p style="text-align: center; padding: 2rem; color: var(--gray);">Loading offers...</p>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>© 2023 PharmaCare Pharmacy Management System | All Rights Reserved</p>
+    </div>
+  </div>
+
+  <script src="./assets/js/api.js"></script>
+  <script>
+    // Wait for API to be available
+    let offersData = [];
+    
+    // Check authentication
+    const pharmacy = JSON.parse(localStorage.getItem('pharmacy') || 'null');
+    const token = localStorage.getItem('token');
+    
+    if (!pharmacy || !token) {
+      window.location.href = 'index.html';
+    } else {
+      const userInfoSpan = document.querySelector('.user-info span');
+      if (userInfoSpan) {
+        userInfoSpan.textContent = pharmacy.username || pharmacy.fullName || pharmacy.Username || 'User';
+      }
+    }
+
+    async function loadUserRole() {
+      try {
+        const profile = await profileAPI.get();
+        if (profile && profile.user) {
+          const userRole = profile.user.Role || '';
+          const isAdmin = userRole === 'admin';
+          
+          // Hide inventory menu item for normal users
+          const inventoryMenuItem = document.getElementById('inventory-menu-item');
+          if (inventoryMenuItem) {
+            inventoryMenuItem.style.display = isAdmin ? 'flex' : 'none';
+          }
+        }
+      } catch (error) {
+      }
+    }
+
+    // Load user role on page load
+    loadUserRole();
+
+    async function loadOffers() {
+      const offersGrid = document.getElementById('offers-grid');
+      if (!offersGrid) {
+        return;
+      }
+      
+      offersGrid.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--gray);">Loading offers...</p>';
+      
+      try {
+        // Wait a bit for API to be available
+        if (typeof offersAPI === 'undefined') {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        if (typeof offersAPI === 'undefined' || !offersAPI.getAll) {
+          throw new Error('API not available');
+        }
+        
+        const response = await offersAPI.getAll();
+        
+        // Handle both array and object responses
+        if (Array.isArray(response)) {
+          offersData = response;
+        } else if (response && response.data && Array.isArray(response.data)) {
+          offersData = response.data;
+        } else if (response && response.recordset && Array.isArray(response.recordset)) {
+          offersData = response.recordset;
+        } else if (response && typeof response === 'object') {
+          // If response is an object but not an array, try to extract data
+          offersData = [];
+        } else {
+          offersData = [];
+        }
+        
+        if (offersData.length === 0) {
+          offersGrid.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--warning);">No special offers available. Please check that inventory data exists in the database.</p>';
+          return;
+        }
+        renderOffers();
+      } catch (error) {
+        offersData = [];
+        offersGrid.innerHTML = 
+          '<p style="text-align: center; padding: 2rem; color: var(--danger);">Error loading offers: ' + 
+          (error.message || 'Please check your connection and try again') + '</p>';
+      }
+    }
+
+    function renderOffers() {
+      const offersGrid = document.getElementById('offers-grid');
+      if (!offersGrid) {
+        return;
+      }
+      
+      offersGrid.innerHTML = '';
+      
+      if (!offersData || offersData.length === 0) {
+        offersGrid.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--gray);">No special offers available at this time.</p>';
+        return;
+      }
+      
+      offersData.forEach(offer => {
+        // Use fields from API (Price and DiscountedPrice from database)
+        const id = offer.ID || offer.id || offer.MedicineID || offer.medicineId;
+        const name = offer.Name || offer.name || offer.MedicineName || 'Unknown Medicine';
+        const description = offer.Description || offer.description || 'Special offer on this medicine';
+        const price = typeof offer.Price === 'number' ? offer.Price : parseFloat(offer.Price || offer.price || 0);
+        const discountedPrice = typeof offer.DiscountedPrice === 'number' ? offer.DiscountedPrice : parseFloat(offer.DiscountedPrice || offer.discountedPrice || offer.discounted_price || price);
+        const discountPercent = offer.DiscountPercent ?? offer.discountPercent ?? offer.discount_percent ?? 0;
+        const stock = offer.Stock ?? offer.stock ?? offer.TotalQuantity ?? 0;
+        
+        const savings = price - discountedPrice;
+        const minOrder = stock < 50 ? 50 : stock < 100 ? 100 : 150;
+        
+        const offerCard = document.createElement('div');
+        offerCard.className = 'offer-card';
+        offerCard.innerHTML = `
+          ${discountPercent >= 30 ? '<div class="ribbon">BEST VALUE</div>' : ''}
+          <div class="offer-badge">${discountPercent}% OFF</div>
+          <div class="offer-image">
+            <i class="fas fa-capsules"></i>
+          </div>
+          <div class="offer-details">
+            <h3 class="offer-title">${name}</h3>
+            <p class="offer-description">${description}</p>
+            <div class="price-container">
+              <span class="original-price">$${price.toFixed(2)} per unit</span>
+              <span class="discounted-price">$${discountedPrice.toFixed(2)}</span>
+            </div>
+            <div class="savings">Save $${savings.toFixed(2)}</div>
+            <div class="offer-meta">
+              <div class="min-order">
+                <i class="fas fa-box"></i> Min. order: ${minOrder} units
+              </div>
+              <div>
+                <i class="fas fa-clock"></i> Limited time
+              </div>
+            </div>
+            <div class="offer-actions">
+              <button class="btn btn-outline" onclick="viewOfferDetails(${id})">
+                <i class="fas fa-info-circle"></i> Details
+              </button>
+              <button class="btn btn-primary" onclick="addToOrder(${id})">
+                <i class="fas fa-cart-plus"></i> Order
+              </button>
+            </div>
+          </div>
+        `;
+        offersGrid.appendChild(offerCard);
+      });
+    }
+
+    function viewOfferDetails(medicineId) {
+      const offer = offersData.find(o => 
+        (o.ID || o.id || o.MedicineID) == medicineId
+      );
+      if (offer) {
+        const name = offer.Name || offer.name || 'Unknown';
+        const company = offer.CompanyName || offer.companyName || 'N/A';
+        const price = parseFloat(offer.Price || offer.price || 0);
+        const discountedPrice = parseFloat(offer.DiscountedPrice || offer.discountedPrice || price);
+        const discount = offer.DiscountPercent || offer.discountPercent || 0;
+        const stock = offer.Stock || offer.stock || 0;
+        
+        alert(`Medicine: ${name}\nCompany: ${company}\nOriginal Price: $${price.toFixed(2)}\nDiscounted Price: $${discountedPrice.toFixed(2)}\nDiscount: ${discount}%\nStock Available: ${stock} units`);
+      }
+    }
+
+    function addToOrder(medicineId) {
+      const offer = offersData.find(o => 
+        (o.ID || o.id || o.MedicineID) == medicineId
+      );
+      if (offer) {
+        // Redirect to orders page with medicine pre-selected
+        window.location.href = `orders.html?medicineId=${medicineId}`;
+      }
+    }
+
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('active');
+    }
+    
+    function logout() {
+      if(confirm('Are you sure you want to logout?')) {
+        if (typeof authAPI !== 'undefined') {
+          authAPI.logout();
+        } else {
+          localStorage.removeItem('pharmacy');
+          localStorage.removeItem('token');
+          localStorage.removeItem('isAuthenticated');
+        }
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Load offers on page load
+    // Use DOMContentLoaded to ensure DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadOffers);
+    } else {
+      loadOffers();
+    }
+  </script>
+</body>
+</html>

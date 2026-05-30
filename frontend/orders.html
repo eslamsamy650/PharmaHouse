@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PharmaCare | Orders</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #8a2be2;
+      --primary-light: rgba(138, 43, 226, 0.1);
+      --primary-dark: #7b1fa2;
+      --danger: #ff3860;
+      --danger-light: rgba(255, 56, 96, 0.1);
+      --warning: #ffb347;
+      --warning-light: rgba(255, 179, 71, 0.1);
+      --success: #00d1b2;
+      --success-light: rgba(0, 209, 178, 0.1);
+      --info: #3298dc;
+      --info-light: rgba(50, 152, 220, 0.1);
+     --dark: #2f3542;
+      --darker: #1e272e;
+      --light: #f5f7fa;
+      --gray: #7a7a7a;
+      --gray-light: #dbdbdb;
+      --sidebar-width: 280px;
+      --transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+      --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.12);
+      --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.16);
+      --border-radius: 16px;
+      --border-radius-sm: 10px;
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.3);
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e6e9f0 100%);
+      color: var(--dark);
+      min-height: 100vh;
+    }
+    
+  
+       .sidebar {
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, var(--darker) 0%, var(--dark) 100%);
+      height: 100vh;
+      position: fixed;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+      z-index: 100;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+    
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .sidebar-header h2 {
+      color: white;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin: 0;
+      background: linear-gradient(90deg, #fff 0%, #a5b1c2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .sidebar-header img {
+      width: 36px;
+      height: 36px;
+      filter: brightness(0) invert(1);
+    }
+    
+    .sidebar-menu {
+      padding: 1rem 0;
+    }
+    
+     .menu-item {
+      padding: 0.85rem 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      margin: 0.25rem 0.5rem;
+      border-radius: var(--border-radius-sm);
+      transition: var(--transition);
+      color: rgba(255, 255, 255, 0.7);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      font-size: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .menu-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: var(--transition);
+    }
+    
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      transform: translateX(5px);
+    }
+    
+    .menu-item:hover::before {
+      left: 100%;
+    }
+    
+    .menu-item.active {
+      background: rgba(108, 92, 231, 0.2);
+      color: white;
+      font-weight: 600;
+      box-shadow: inset 0 0 10px rgba(108, 92, 231, 0.3);
+    }
+    
+    .menu-item.active::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: var(--primary);
+      border-radius: 0 4px 4px 0;
+    }
+    
+    .menu-item i {
+      margin-right: 0.75rem;
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+    
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 2rem;
+      transition: var(--transition);
+      min-height: 100vh;
+    }
+    
+    /* Header - Floating Glass Panel */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      background: var(--glass-bg);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(138, 43, 226, 0.05) 0%, transparent 70%);
+      z-index: -1;
+    }
+    
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .page-title h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--info) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-title i {
+      font-size: 1.8rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .user-info {
+      background: linear-gradient(90deg, var(--primary-light) 0%, var(--info-light) 100%);
+      padding: 0.5rem 1.25rem;
+      border-radius: 50px;
+      color: var(--primary-dark);
+      font-weight: 600;
+      border: 1px solid rgba(138, 43, 226, 0.2);
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .user-info:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(138, 43, 226, 0.15);
+    }
+    
+    .order-tabs {
+      display: flex;
+      border-bottom: none;
+      margin-bottom: 1.5rem;
+      gap: 0.5rem;
+    }
+    
+    .order-tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+      background: rgba(255, 255, 255, 0.5);
+      color: var(--gray);
+      font-weight: 500;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.05);
+      border-bottom: none;
+    }
+    
+    .order-tab::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: transparent;
+      transition: var(--transition);
+    }
+    
+    .order-tab:hover {
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--dark);
+    }
+    
+    .order-tab.active {
+      background: var(--glass-bg);
+      color: var(--primary-dark);
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      border: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--glass-bg);
+    }
+    
+    .order-tab.active::before {
+      background: linear-gradient(90deg, var(--primary) 0%, var(--info) 100%);
+    }
+    
+    .order-section {
+      display: none;
+      background: var(--glass-bg);
+      border-radius: 0 var(--border-radius) var(--border-radius) var(--border-radius);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .order-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(138, 43, 226, 0.05) 0%, transparent 70%);
+      z-index: -1;
+    }
+    
+    .order-section.active {
+      display: block;
+      animation: fadeIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .order-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.75rem;
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    .form-control {
+      width: 80%;
+      padding: 0.85rem 1rem;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: var(--border-radius-sm);
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.7);
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.2);
+      background: white;
+    }
+    
+    .supplier-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      background-size: 1rem;
+    }
+    
+    .medicine-search-container {
+      position: relative;
+    }
+    
+    .medicine-suggestions {
+      position: absolute;
+      width: 100%;
+      max-height: 250px;
+      overflow-y: auto;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius-sm);
+      z-index: 100;
+      display: none;
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(10px);
+    }
+    
+    .suggestion-item {
+      padding: 1rem;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      transition: var(--transition);
+    }
+    
+    .suggestion-item:hover {
+      background: rgba(138, 43, 226, 0.05);
+      transform: translateX(5px);
+    }
+    
+    .suggestion-item.critical {
+      border-left: 4px solid var(--danger);
+      background: rgba(255, 56, 96, 0.05);
+    }
+    
+    .suggestion-item.low {
+      border-left: 4px solid var(--warning);
+      background: rgba(255, 179, 71, 0.05);
+    }
+    
+    .help-text {
+      font-size: 0.85rem;
+      color: var(--gray);
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+    
+    .order-items {
+      margin-top: 1rem;
+      border: 1px solid var(--glass-border);
+      border-radius: var(--border-radius-sm);
+      overflow: hidden;
+      background: var(--glass-bg);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .empty-state {
+      padding: 2rem;
+      text-align: center;
+      color: var(--gray);
+      font-style: italic;
+    }
+    
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 1.25rem;
+      background: var(--glass-bg);
+      border-bottom: 1px solid var(--glass-border);
+      transition: var(--transition);
+      position: relative;
+    }
+    
+    .order-item:hover {
+      background: rgba(138, 43, 226, 0.03);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+    
+    .order-item:last-child {
+      border-bottom: none;
+    }
+    
+    .order-item-info {
+      flex: 1;
+    }
+    
+    .order-item-name {
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    .order-item-meta {
+      font-size: 0.85rem;
+      color: var(--gray);
+      margin-top: 0.5rem;
+    }
+    
+    .order-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .order-item-price {
+      text-align: right;
+      min-width: 120px;
+    }
+    
+    .order-item-unit-price {
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+    
+    .order-item-total-price {
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .quantity-btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .quantity-btn:hover {
+      background: rgba(138, 43, 226, 0.1);
+      transform: scale(1.1);
+    }
+    
+    .remove-item-btn {
+      color: var(--danger);
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-left: 0.5rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    
+    .remove-item-btn:hover {
+      background: var(--danger-light);
+      transform: scale(1.1);
+    }
+    
+    .order-summary {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--glass-bg);
+      border-radius: var(--border-radius-sm);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .order-summary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(138, 43, 226, 0.05) 0%, rgba(50, 152, 220, 0.05) 100%);
+      z-index: -1;
+    }
+    
+    .order-summary h3 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      color: var(--primary-dark);
+      font-size: 1.25rem;
+    }
+    
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    
+    .summary-item {
+      margin-bottom: 1rem;
+    }
+    
+    .summary-item strong {
+      display: inline-block;
+      width: 140px;
+      color: var(--gray);
+    }
+    
+    .order-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .btn {
+      padding: 0.85rem 1.75rem;
+      border: none;
+      border-radius: var(--border-radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 600;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: var(--transition);
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(138, 43, 226, 0.3);
+    }
+    
+    .btn-outline {
+      background: var(--glass-bg);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background: var(--primary-light);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(138, 43, 226, 0.2);
+    }
+    
+    .order-history {
+      margin-top: 2rem;
+    }
+    
+    .order-history-controls {
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .order-history-controls input,
+    .order-history-controls select {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .order-history-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: var(--glass-bg);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+    }
+    
+    .order-history-table th, 
+    .order-history-table td {
+      padding: 1.25rem;
+      text-align: left;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .order-history-table th {
+      background: rgba(138, 43, 226, 0.1);
+      font-weight: 600;
+      color: var(--primary-dark);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(10px);
+    }
+    
+    .order-history-table tr:hover {
+      background: rgba(138, 43, 226, 0.03);
+    }
+    
+    .order-status {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .status-pending {
+      background: linear-gradient(135deg, var(--warning-light) 0%, var(--glass-bg) 100%);
+      color: var(--warning);
+      border-left: 3px solid var(--warning);
+    }
+    
+    .status-approved {
+      background: linear-gradient(135deg, var(--success-light) 0%, var(--glass-bg) 100%);
+      color: var(--success);
+      border-left: 3px solid var(--success);
+    }
+    
+    .status-delivered {
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--glass-bg) 100%);
+      color: var(--primary);
+      border-left: 3px solid var(--primary);
+    }
+    
+    .status-cancelled {
+      background: linear-gradient(135deg, var(--danger-light) 0%, var(--glass-bg) 100%);
+      color: var(--danger);
+      border-left: 3px solid var(--danger);
+    }
+    
+    .view-order-btn {
+      color: var(--primary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem 1rem;
+      border-radius: var(--border-radius-sm);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .view-order-btn:hover {
+      background: var(--primary-light);
+      transform: translateY(-2px);
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 2rem;
+      gap: 1rem;
+    }
+    
+    .page-btn {
+      padding: 0.75rem 1.25rem;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      cursor: pointer;
+      border-radius: var(--border-radius-sm);
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .page-btn:hover:not(:disabled) {
+      background: rgba(138, 43, 226, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    @media (max-width: 1200px) {
+      .order-form {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .order-tabs {
+        flex-wrap: wrap;
+      }
+      
+      .order-tab {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .order-actions {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .floating {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .sidebar-header {
+      animation: float 4s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(138, 43, 226, 0.4); }
+      70% { box-shadow: 0 0 0 15px rgba(138, 43, 226, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(138, 43, 226, 0); }
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <img src="https://cdn-icons-png.flaticon.com/512/3952/3952026.png" alt="Pharmacy Icon">
+      <h2>PharmaCare</h2>
+    </div>
+    <div class="sidebar-menu">
+      <div class="menu-item" onclick="window.location.href='dashboard.html'">
+        <i class="fas fa-chart-line"></i> Dashboard
+      </div>
+        <div class="menu-item" onclick="window.location.href='ProfilePage.html'">
+        <i class="fas fa-box-open"></i> Pharmacy Profile
+      </div>
+      <div class="menu-item" id="inventory-menu-item" onclick="window.location.href='inventory.html'">
+        <i class="fas fa-pills"></i> Inventory
+      </div>
+     
+        <div class="menu-item" onclick="window.location.href='SpecialOffers.html'">
+        <i class="fas fa-credit-card"></i> Pharmacy Offers
+      </div>
+      <div class="menu-item active" onclick="window.location.href='orders.html'">
+        <i class="fas fa-box-open"></i> Orders
+      </div>
+      
+      <div class="menu-item" onclick="window.location.href='payments.html'">
+        <i class="fas fa-credit-card"></i> Payments
+      </div>
+  
+      <div class="menu-item" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div id="orders-section" class="active-section">
+      <div class="header floating">
+        <div class="page-title">
+          <i class="fas fa-box-open"></i>
+          <h1>Order Management</h1>
+        </div>
+        <div class="user-info pulse">
+          Welcome, <span id="pharmacy-name-orders">Loading...</span>
+        </div>
+      </div>
+
+      <div class="order-tabs">
+        <div class="order-tab active" onclick="showOrderTab('new-order')">
+          <i class="fas fa-plus-circle"></i> New Order
+        </div>
+        <div class="order-tab" onclick="showOrderTab('order-history')">
+          <i class="fas fa-history"></i> Order History
+        </div>
+      </div>
+
+      <div id="new-order-tab" class="order-section active">
+        <div class="order-form">
+          <div>
+            <div class="form-group">
+              <label for="supplier"><i class="fas fa-truck"></i> Supplier <span style="color: var(--gray); font-weight: normal;">(Optional)</span></label>
+              <select id="supplier" class="form-control supplier-select">
+                <option value="">Select Supplier (Optional)</option>
+                <option value="1">EIPICO Pharmaceuticals</option>
+                <option value="2">Pharco International</option>
+                <option value="3">Eva Pharma</option>
+                <option value="4">Sedico Pharmaceuticals</option>
+                <option value="5">Global Napi</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="delivery-date"><i class="fas fa-calendar-alt"></i> Delivery Date</label>
+              <input type="date" id="delivery-date" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="priority"><i class="fas fa-bolt"></i> Priority</label>
+              <select id="priority" class="form-control">
+                <option value="normal">Normal (5-7 days)</option>
+                <option value="urgent">Urgent (2-3 days)</option>
+                <option value="emergency">Emergency (24 hours)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="notes"><i class="fas fa-sticky-note"></i> Notes</label>
+              <textarea id="notes" class="form-control" rows="3" placeholder="Any special instructions..."></textarea>
+            </div>
+          </div>
+          
+          <div>
+            <div class="form-group">
+              <label for="medicine-select"><i class="fas fa-pills"></i> Add Medicines</label>
+              <select id="medicine-select" class="form-control">
+                <option value="">Select Medicine</option>
+              </select>
+              <p class="help-text">Select a medicine to add to order</p>
+            </div>
+            
+            <div class="form-group" style="margin-top: 1rem;">
+              <button type="button" class="btn btn-outline" onclick="addSelectedMedicine()" style="width: 100%;">
+                <i class="fas fa-plus"></i> Add Medicine to Order
+              </button>
+            </div>
+            
+            <div class="order-items" id="order-items">
+              <div class="empty-state">
+                <i class="fas fa-box-open" style="font-size: 2rem; opacity: 0.3; margin-bottom: 1rem;"></i>
+                <p>No items added to order yet</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="order-summary">
+          <h3><i class="fas fa-receipt"></i> Order Summary</h3>
+          <div class="summary-grid">
+            <div>
+              <div class="summary-item">
+                <strong>Total Items:</strong> <span id="total-items">0</span>
+              </div>
+              <div class="summary-item">
+                <strong>Total Quantity:</strong> <span id="total-quantity">0</span>
+              </div>
+            </div>
+            <div>
+              <div class="summary-item">
+                <strong>Subtotal:</strong> $<span id="subtotal">0.00</span>
+              </div>
+              <div class="summary-item">
+                <strong>Estimated Total:</strong> $<span id="estimated-total">0.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="order-actions">
+          <button class="btn btn-outline" onclick="clearOrder()">
+            <i class="fas fa-trash"></i> Clear Order
+          </button>
+          <button class="btn btn-primary" onclick="submitOrder()">
+            <i class="fas fa-paper-plane"></i> Submit Order
+          </button>
+        </div>
+      </div>
+
+      <div id="order-history-tab" class="order-section">
+        <div class="order-history">
+          <div class="order-history-controls">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+              <input type="text" id="order-search" placeholder="Search orders..." class="form-control" style="flex: 1;">
+              <select id="order-status-filter" class="form-control">
+                <option value="all">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+          
+          <table class="order-history-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Supplier</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="order-history-body">
+            </tbody>
+          </table>
+          
+          <div class="pagination" id="order-pagination">
+            <!-- Pagination will be dynamically generated -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./assets/js/api.js"></script>
+  <script>
+    const pharmacy = JSON.parse(localStorage.getItem('pharmacy'));
+    if (!pharmacy || !localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+    } else {
+      document.getElementById('pharmacy-name-orders').textContent = pharmacy.username || pharmacy.fullName || 'User';
+    }
+
+    async function loadUserRole() {
+      try {
+        const profile = await profileAPI.get();
+        if (profile && profile.user) {
+          const userRole = profile.user.Role || '';
+          const isAdmin = userRole === 'admin';
+          
+          // Hide inventory menu item for normal users
+          const inventoryMenuItem = document.getElementById('inventory-menu-item');
+          if (inventoryMenuItem) {
+            inventoryMenuItem.style.display = isAdmin ? 'flex' : 'none';
+          }
+        }
+      } catch (error) {
+      }
+    }
+
+    // Load user role on page load
+    loadUserRole();
+
+    let medicinesData = [];
+    let suppliersData = [];
+    let orderHistoryData = [];
+    let filteredOrderHistory = [];
+    let currentOrderPage = 1;
+    const ordersPerPage = 10;
+
+    async function loadData() {
+      try {
+        [medicinesData, suppliersData, orderHistoryData] = await Promise.all([
+          medicinesAPI.getAll().catch(() => []),
+          suppliersAPI.getAll().catch(() => []),
+          ordersAPI.getAll().catch(() => [])
+        ]);
+        
+        // Populate supplier dropdown
+        const supplierSelect = document.getElementById('supplier');
+        supplierSelect.innerHTML = '<option value="">Select Supplier</option>';
+        suppliersData.forEach(supplier => {
+          const option = document.createElement('option');
+          option.value = supplier.SupplierID;
+          option.textContent = supplier.Name;
+          supplierSelect.appendChild(option);
+        });
+        
+        // Populate medicine dropdown (all medicines, will be filtered by supplier if needed)
+        populateMedicineDropdown();
+        
+        // Add event listener to supplier dropdown to filter medicines
+        supplierSelect.addEventListener('change', populateMedicineDropdown);
+        
+        filteredOrderHistory = [...orderHistoryData];
+        renderOrderHistory();
+        
+        // Add event listeners for search and filter
+        const searchInput = document.getElementById('order-search');
+        const statusFilter = document.getElementById('order-status-filter');
+        
+        if (searchInput) {
+          searchInput.addEventListener('input', filterOrderHistory);
+        }
+        if (statusFilter) {
+          statusFilter.addEventListener('change', filterOrderHistory);
+        }
+      } catch (error) {
+      }
+    }
+    
+    function filterOrderHistory() {
+      const searchTerm = (document.getElementById('order-search')?.value || '').toLowerCase();
+      const statusFilter = document.getElementById('order-status-filter')?.value || 'all';
+      
+      filteredOrderHistory = orderHistoryData.filter(order => {
+        const matchesSearch = !searchTerm || 
+          String(order.OrderID).includes(searchTerm) ||
+          (order.PharmacyName || '').toLowerCase().includes(searchTerm) ||
+          String(order.TotalAmount || '').includes(searchTerm);
+        
+        const matchesStatus = statusFilter === 'all' || 
+          (statusFilter === 'Pending' && (!order.PaymentStatus || order.PaymentStatus === 'Pending')) ||
+          (statusFilter === 'Paid' && order.PaymentStatus === 'Paid') ||
+          (statusFilter === 'Cancelled' && order.PaymentStatus === 'Cancelled');
+        
+        return matchesSearch && matchesStatus;
+      });
+      
+      currentOrderPage = 1; // Reset to first page on filter
+      renderOrderHistory();
+    }
+
+    const orderItems = [];
+    let currentOrderTab = 'new-order';
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const today = new Date();
+      const deliveryDate = new Date();
+      deliveryDate.setDate(today.getDate() + 3);
+      document.getElementById('delivery-date').valueAsDate = deliveryDate;
+      
+      // Check if medicine ID is in URL (from Special Offers page)
+      const urlParams = new URLSearchParams(window.location.search);
+      const medicineId = urlParams.get('medicineId');
+      if (medicineId) {
+        // Find and add the medicine to order
+        setTimeout(async () => {
+          try {
+            const medicine = medicinesData.find(m => m.ID == medicineId || m.MedicineID == medicineId);
+            if (medicine) {
+              addMedicineToOrder(medicine);
+              // Clear URL parameter
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          } catch (error) {
+          }
+        }, 500);
+      }
+      
+      renderOrderHistory();
+    });
+
+    function showSection(sectionId) {
+      document.querySelectorAll('.main-content > div').forEach(section => {
+        section.classList.remove('active-section');
+      });
+      
+      document.getElementById(`${sectionId}-section`).classList.add('active-section');
+      
+      document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+      
+      if (sectionId === 'orders') {
+        document.getElementById('pharmacy-name-orders').textContent = pharmacy.name;
+        showOrderTab(currentOrderTab);
+      }
+    }
+
+    function showOrderTab(tabId) {
+      currentOrderTab = tabId;
+      
+      document.querySelectorAll('.order-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+      
+      document.querySelectorAll('.order-section').forEach(section => {
+        section.classList.remove('active');
+      });
+      document.getElementById(`${tabId}-tab`).classList.add('active');
+      
+      if (tabId === 'order-history') {
+        renderOrderHistory();
+      }
+    }
+
+    async function populateMedicineDropdown() {
+      const medicineSelect = document.getElementById('medicine-select');
+      if (!medicineSelect) return;
+      
+      const selectedSupplier = document.getElementById('supplier')?.value;
+      medicineSelect.innerHTML = '<option value="">Loading medicines...</option>';
+      
+      try {
+        let medicinesToShow = [];
+        
+        if (selectedSupplier) {
+          // Fetch medicines filtered by supplier
+          medicinesToShow = await medicinesAPI.getBySupplier(selectedSupplier);
+        } else {
+          // Show all medicines if no supplier selected
+          medicinesToShow = medicinesData.length > 0 ? medicinesData : await medicinesAPI.getAll();
+        }
+        
+        medicineSelect.innerHTML = '<option value="">Select Medicine</option>';
+        
+        if (medicinesToShow.length === 0) {
+          medicineSelect.innerHTML = '<option value="">No medicines available for this supplier</option>';
+          return;
+        }
+        
+        medicinesToShow.forEach(med => {
+          const option = document.createElement('option');
+          option.value = med.ID;
+          option.textContent = `${med.Name} (ID: ${med.ID}) - $${parseFloat(med.Price || 0).toFixed(2)}`;
+          option.dataset.medicine = JSON.stringify(med);
+          medicineSelect.appendChild(option);
+        });
+      } catch (error) {
+        medicineSelect.innerHTML = '<option value="">Error loading medicines</option>';
+      }
+    }
+    
+    function addSelectedMedicine() {
+      const medicineSelect = document.getElementById('medicine-select');
+      const selectedValue = medicineSelect.value;
+      
+      if (!selectedValue) {
+        alert('Please select a medicine');
+        return;
+      }
+      
+      const selectedOption = medicineSelect.options[medicineSelect.selectedIndex];
+      const medicine = JSON.parse(selectedOption.dataset.medicine);
+      
+      addMedicineToOrder(medicine);
+      medicineSelect.value = '';
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.medicine-search-container')) {
+        document.getElementById('suggestions').style.display = 'none';
+      }
+    });
+
+    function addMedicineToOrder(medicine) {
+      const existingItem = orderItems.find(item => item.id === medicine.ID);
+      
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        orderItems.push({
+          id: medicine.ID,
+          name: medicine.Name,
+          description: medicine.Description,
+          currentStock: medicine.TotalQuantity || 0,
+          quantity: 1,
+          unitPrice: parseFloat(medicine.Price || 0)
+        });
+      }
+      
+      renderOrderItems();
+    }
+
+    function renderOrderItems() {
+      const container = document.getElementById('order-items');
+      container.innerHTML = '';
+      
+      if (orderItems.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-box-open" style="font-size: 2rem; opacity: 0.3; margin-bottom: 1rem;"></i>
+            <p>No items added to order yet</p>
+          </div>
+        `;
+        updateOrderSummary();
+        return;
+      }
+      
+      orderItems.forEach((item, index) => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'order-item';
+        itemElement.innerHTML = `
+          <div class="order-item-info">
+            <div class="order-item-name">${item.name}</div>
+            <div class="order-item-meta">${item.description || 'N/A'} | Current stock: ${item.currentStock}</div>
+          </div>
+          <div class="order-item-actions">
+            <div class="order-item-price">
+              <div class="order-item-unit-price">$${item.unitPrice.toFixed(2)}/unit</div>
+              <div class="order-item-total-price">$${(item.unitPrice * item.quantity).toFixed(2)}</div>
+            </div>
+            <div class="quantity-controls">
+              <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">-</button>
+              <span>${item.quantity}</span>
+              <button class="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
+            </div>
+            <button class="remove-item-btn" onclick="removeOrderItem(${index})">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(itemElement);
+      });
+      
+      updateOrderSummary();
+    }
+
+    function updateQuantity(index, change) {
+      const newQuantity = orderItems[index].quantity + change;
+      if (newQuantity > 0) {
+        orderItems[index].quantity = newQuantity;
+        renderOrderItems();
+      }
+    }
+
+    function removeOrderItem(index) {
+      orderItems.splice(index, 1);
+      renderOrderItems();
+    }
+
+    function updateOrderSummary() {
+      let totalItems = 0;
+      let totalQuantity = 0;
+      let subtotal = 0;
+      
+      orderItems.forEach(item => {
+        totalItems++;
+        totalQuantity += item.quantity;
+        subtotal += item.unitPrice * item.quantity;
+      });
+      
+      const priority = document.getElementById('priority').value;
+      let surcharge = 0;
+      if (priority === 'urgent') surcharge = subtotal * 0.1;
+      if (priority === 'emergency') surcharge = subtotal * 0.2;
+      const estimatedTotal = subtotal + surcharge;
+      
+      document.getElementById('total-items').textContent = totalItems;
+      document.getElementById('total-quantity').textContent = totalQuantity;
+      document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+      document.getElementById('estimated-total').textContent = estimatedTotal.toFixed(2);
+    }
+
+    document.getElementById('priority').addEventListener('change', updateOrderSummary);
+
+    function clearOrder() {
+      if (orderItems.length > 0 && confirm('Are you sure you want to clear this order?')) {
+        orderItems.length = 0;
+        renderOrderItems();
+      }
+    }
+
+    function generateOrderId() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const random = Math.floor(Math.random() * 900) + 100;
+      return `ORD-${year}${month}${day}-${random}`;
+    }
+
+    async function submitOrder() {
+      if (orderItems.length === 0) {
+        alert('Please add items to the order before submitting');
+        return;
+      }
+      
+      const supplier = document.getElementById('supplier').value;
+      // Supplier is now optional, no validation needed
+      
+      const deliveryDate = document.getElementById('delivery-date').value;
+      if (!deliveryDate) {
+        alert('Please select a delivery date');
+        return;
+      }
+      
+      let subtotal = 0;
+      orderItems.forEach(item => {
+        subtotal += item.unitPrice * item.quantity;
+      });
+      
+      const priority = document.getElementById('priority').value;
+      let surcharge = 0;
+      if (priority === 'urgent') surcharge = subtotal * 0.1;
+      if (priority === 'emergency') surcharge = subtotal * 0.2;
+      const totalAmount = subtotal + surcharge;
+      
+      try {
+        const order = {
+          PharmacyID: null,
+          SupplierID: supplier || null,
+          items: orderItems.map(item => ({
+            MedicineID: item.id,
+            Quantity: item.quantity,
+            UnitPrice: item.unitPrice
+          })),
+          TotalAmount: totalAmount
+        };
+        
+        const result = await ordersAPI.create(order);
+        
+        // Store order ID for payment page
+        if (result.orderId) {
+          localStorage.setItem('pendingOrderId', result.orderId);
+          localStorage.setItem('pendingInvoiceId', result.invoiceId);
+        }
+        
+        orderItems.length = 0;
+        renderOrderItems();
+        document.getElementById('supplier').value = '';
+        document.getElementById('priority').value = 'normal';
+        document.getElementById('notes').value = '';
+        
+        const today = new Date();
+        const newDeliveryDate = new Date();
+        newDeliveryDate.setDate(today.getDate() + 3);
+        document.getElementById('delivery-date').valueAsDate = newDeliveryDate;
+        
+        // Redirect to payments page
+        window.location.href = 'payments.html';
+      } catch (error) {
+        alert('Error submitting order: ' + (error.message || 'Please try again'));
+      }
+    }
+
+    function renderOrderHistory() {
+      const tbody = document.getElementById('order-history-body');
+      tbody.innerHTML = '';
+      
+      if (filteredOrderHistory.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem;">No orders found</td></tr>';
+        updateOrderPagination(0);
+        return;
+      }
+      
+      // Calculate pagination
+      const totalPages = Math.ceil(filteredOrderHistory.length / ordersPerPage);
+      const startIndex = (currentOrderPage - 1) * ordersPerPage;
+      const endIndex = startIndex + ordersPerPage;
+      const pageOrders = filteredOrderHistory.slice(startIndex, endIndex);
+      
+      // Reset to page 1 if current page is out of bounds
+      if (currentOrderPage > totalPages && totalPages > 0) {
+        currentOrderPage = 1;
+        return renderOrderHistory();
+      }
+      
+      pageOrders.forEach(order => {
+        const orderDate = order.OrderDate ? new Date(order.OrderDate).toLocaleDateString() : 'N/A';
+        const status = order.PaymentStatus ? (order.PaymentStatus === 'Paid' ? 'delivered' : 'pending') : 'pending';
+        
+        // Format items display
+        let itemsDisplay = 'No items';
+        if (order.items && order.items.length > 0) {
+          const itemNames = order.items.map(item => 
+            `${item.MedicineName || `Medicine ID: ${item.MedicineID}`} (${item.Quantity}x)`
+          );
+          itemsDisplay = itemNames.join(', ');
+          // If too long, show count and first item
+          if (itemsDisplay.length > 50) {
+            itemsDisplay = `${order.items.length} item(s): ${itemNames[0]}${order.items.length > 1 ? '...' : ''}`;
+          }
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${order.OrderID}</td>
+          <td>${orderDate}</td>
+          <td>${order.SupplierName || 'N/A'}</td>
+          <td title="${order.items && order.items.length > 0 ? order.items.map(i => `${i.MedicineName || 'Medicine ' + i.MedicineID}: ${i.Quantity}x @ $${i.UnitPrice}`).join('\\n') : 'No items'}">${itemsDisplay}</td>
+          <td>$${parseFloat(order.TotalAmount || 0).toFixed(2)}</td>
+          <td><span class="order-status status-${status}">${formatStatus(status)}</span></td>
+          <td>
+            <button class="view-order-btn" onclick="viewOrderDetails(${order.OrderID})">
+              <i class="fas fa-eye"></i> View
+            </button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+      
+      // Update pagination
+      updateOrderPagination(filteredOrderHistory.length);
+    }
+    
+    function updateOrderPagination(totalItems) {
+      const paginationDiv = document.getElementById('order-pagination');
+      if (!paginationDiv) return;
+      
+      const totalPages = Math.ceil(totalItems / ordersPerPage);
+      
+      // Hide pagination if items don't exceed one page
+      if (totalItems <= ordersPerPage) {
+        paginationDiv.style.display = 'none';
+        return;
+      }
+      
+      // Show pagination
+      paginationDiv.style.display = 'flex';
+      
+      // Update pagination HTML
+      paginationDiv.innerHTML = `
+        <button class="btn btn-outline" onclick="changeOrderPage(-1)" ${currentOrderPage === 1 ? 'disabled' : ''}>
+          <i class="fas fa-chevron-left"></i> Previous
+        </button>
+        <span style="margin: 0 1rem;">Page ${currentOrderPage} of ${totalPages}</span>
+        <button class="btn btn-outline" onclick="changeOrderPage(1)" ${currentOrderPage === totalPages ? 'disabled' : ''}>
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
+      `;
+    }
+    
+    function changeOrderPage(direction) {
+      const totalPages = Math.ceil(filteredOrderHistory.length / ordersPerPage);
+      
+      if (direction > 0 && currentOrderPage < totalPages) {
+        currentOrderPage++;
+        renderOrderHistory();
+      } else if (direction < 0 && currentOrderPage > 1) {
+        currentOrderPage--;
+        renderOrderHistory();
+      }
+    }
+
+    function formatStatus(status) {
+      const statusMap = {
+        'pending': 'Pending',
+        'Paid': 'Paid',
+        'Pending': 'Pending',
+        'Cancelled': 'Cancelled'
+      };
+      return statusMap[status] || status || 'Pending';
+    }
+
+    function viewOrderDetails(orderId) {
+      const order = filteredOrderHistory.find(o => o.OrderID === orderId);
+      if (!order) {
+        alert('Order not found');
+        return;
+      }
+      
+      const orderDate = order.OrderDate ? new Date(order.OrderDate).toLocaleDateString() : 'N/A';
+      const status = order.PaymentStatus ? (order.PaymentStatus === 'Paid' ? 'delivered' : 'pending') : 'pending';
+      
+      let itemsHtml = '';
+      let subtotal = 0;
+      if (order.items && order.items.length > 0) {
+        order.items.forEach(item => {
+          const itemTotal = parseFloat(item.UnitPrice || 0) * parseInt(item.Quantity || 0);
+          subtotal += itemTotal;
+          itemsHtml += `
+            <tr>
+              <td>${item.MedicineName || `Medicine ID: ${item.MedicineID}`}</td>
+              <td style="text-align: right;">${item.Quantity}</td>
+              <td style="text-align: right;">$${parseFloat(item.UnitPrice || 0).toFixed(2)}</td>
+              <td style="text-align: right;">$${itemTotal.toFixed(2)}</td>
+            </tr>
+          `;
+        });
+      } else {
+        itemsHtml = '<tr><td colspan="4" style="text-align: center; padding: 1rem;">No items found</td></tr>';
+      }
+      
+      const totalAmount = parseFloat(order.TotalAmount || 0);
+      const surcharge = totalAmount - subtotal;
+      
+      const modalHtml = `
+        <div style="padding: 2rem; max-width: 800px; background: white; border-radius: var(--border-radius); box-shadow: var(--shadow-lg);">
+          <h2 style="margin-bottom: 1rem; color: var(--primary-dark);">Order Details: ${order.OrderID}</h2>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+            <div>
+              <h3 style="margin-bottom: 0.5rem; color: var(--dark);">Order Information</h3>
+              <p><strong>Date:</strong> ${orderDate}</p>
+              <p><strong>Supplier:</strong> ${order.SupplierName || 'N/A'}</p>
+              <p><strong>Status:</strong> <span class="order-status status-${status}">${formatStatus(status)}</span></p>
+              <p><strong>Pharmacy:</strong> ${order.PharmacyName || 'N/A'}</p>
+            </div>
+            <div>
+              <h3 style="margin-bottom: 0.5rem; color: var(--dark);">Payment Information</h3>
+              <p><strong>Invoice ID:</strong> ${order.InvoiceID || 'N/A'}</p>
+              <p><strong>Invoice Date:</strong> ${order.InvoiceDate ? new Date(order.InvoiceDate).toLocaleDateString() : 'N/A'}</p>
+              <p><strong>Payment Status:</strong> ${order.PaymentStatus || 'Pending'}</p>
+            </div>
+          </div>
+          
+          <h3 style="margin-bottom: 1rem; color: var(--dark);">Order Items</h3>
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem;">
+            <thead>
+              <tr style="background: #f8f9fa;">
+                <th style="padding: 0.75rem; text-align: left;">Medicine</th>
+                <th style="padding: 0.75rem; text-align: right;">Qty</th>
+                <th style="padding: 0.75rem; text-align: right;">Unit Price</th>
+                <th style="padding: 0.75rem; text-align: right;">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+              <tr style="border-top: 1px solid #ddd;">
+                <td colspan="3" style="padding: 0.75rem; text-align: right;"><strong>Subtotal:</strong></td>
+                <td style="padding: 0.75rem; text-align: right;">$${subtotal.toFixed(2)}</td>
+              </tr>
+              ${surcharge > 0 ? `
+              <tr>
+                <td colspan="3" style="padding: 0.75rem; text-align: right;"><strong>Additional Charges:</strong></td>
+                <td style="padding: 0.75rem; text-align: right;">$${surcharge.toFixed(2)}</td>
+              </tr>
+              ` : ''}
+              <tr style="font-weight: bold;">
+                <td colspan="3" style="padding: 0.75rem; text-align: right;"><strong>Total:</strong></td>
+                <td style="padding: 0.75rem; text-align: right;">$${totalAmount.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+            <button onclick="closeModal()" style="padding: 0.75rem 1.5rem; background: #f5f5f5; border: none; border-radius: var(--border-radius-sm); cursor: pointer; transition: var(--transition);">
+              Close
+            </button>
+          </div>
+        </div>
+      `;
+      
+      const modal = document.createElement('div');
+      modal.style.position = 'fixed';
+      modal.style.top = '0';
+      modal.style.left = '0';
+      modal.style.width = '100%';
+      modal.style.height = '100%';
+      modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      modal.style.display = 'flex';
+      modal.style.justifyContent = 'center';
+      modal.style.alignItems = 'center';
+      modal.style.zIndex = '1000';
+      modal.style.backdropFilter = 'blur(5px)';
+      modal.innerHTML = modalHtml;
+      
+      modal.querySelector('button[onclick="closeModal()"]').addEventListener('click', () => {
+        document.body.removeChild(modal);
+      });
+      
+      document.body.appendChild(modal);
+    }
+
+    function closeModal() {
+      const modals = document.querySelectorAll('body > div[style*="position: fixed;"]');
+      modals.forEach(modal => document.body.removeChild(modal));
+    }
+
+    function cancelOrder(orderId) {
+      if (confirm('Are you sure you want to cancel this order?')) {
+        const order = mockData.orderHistory.find(o => o.id === orderId);
+        if (order) {
+          order.status = 'cancelled';
+          renderOrderHistory();
+          closeModal();
+          alert('Order has been cancelled');
+        }
+      }
+    }
+
+    function getRandomPrice(category) {
+      const basePrices = {
+        'Chemotherapy': 150,
+        'Targeted Therapy': 300,
+        'Immunotherapy': 250,
+        'Oral Chemo': 100
+      };
+      const base = basePrices[category] || 200;
+      return base + (Math.random() * 50);
+    }
+
+    function logout() {
+      if (typeof authAPI !== 'undefined') {
+        authAPI.logout();
+      } else {
+        localStorage.removeItem('pharmacy');
+        localStorage.removeItem('token');
+        localStorage.removeItem('isAuthenticated');
+      }
+      window.location.href = 'index.html';
+    }
+
+    // Load data on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      loadData();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pharma House | Your Trusted Pharmacy Partner</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --primary-light: rgba(108, 92, 231, 0.1);
+      --primary-dark: #5649c0;
+      --danger: #ff4757;
+      --danger-light: rgba(255, 71, 87, 0.1);
+      --warning: #ffa502;
+      --warning-light: rgba(255, 165, 2, 0.1);
+      --success: #2ed573;
+      --success-light: rgba(46, 213, 115, 0.1);
+      --info: #1e90ff;
+      --info-light: rgba(30, 144, 255, 0.1);
+      --dark: #2f3542;
+      --darker: #1e272e;
+      --light: #f8f9fa;
+      --gray: #a4b0be;
+      --gray-light: #dfe6e9;
+      --transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+      --border-radius: 12px;
+      --border-radius-sm: 8px;
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.3);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #f1f5f9 100%);
+      color: var(--dark);
+      line-height: 1.6;
+    }
+    
+    /* Navigation */
+    .navbar {
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      padding: 1rem 0;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+      box-shadow: var(--shadow-md);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+    }
+    
+    .logo i {
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-menu {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+    }
+    
+    .nav-menu a {
+      text-decoration: none;
+      color: var(--dark);
+      font-weight: 500;
+      transition: var(--transition);
+      position: relative;
+    }
+    
+    .nav-menu a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--primary);
+      transition: var(--transition);
+    }
+    
+    .nav-menu a:hover::after {
+      width: 100%;
+    }
+    
+    .nav-menu a:hover {
+      color: var(--primary);
+    }
+    
+    .nav-login {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: var(--border-radius-sm);
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .nav-login:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: var(--primary);
+      cursor: pointer;
+    }
+    
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.1) 0%, rgba(30, 144, 255, 0.1) 100%);
+      padding: 8rem 0 4rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(108, 92, 231, 0.05) 0%, transparent 70%);
+      z-index: -1;
+    }
+    
+    .hero-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--info) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: fadeInUp 1s ease forwards;
+    }
+    
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--gray);
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      animation: fadeInUp 1s ease 0.2s forwards;
+      opacity: 0;
+    }
+    
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 1s ease 0.4s forwards;
+      opacity: 0;
+    }
+    
+    .btn {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: var(--border-radius-sm);
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .btn-outline {
+      background: var(--glass-bg);
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-3px);
+    }
+    
+    /* Medicine Categories */
+    .categories {
+      padding: 4rem 0;
+      background: white;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    
+    .section-title {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .section-title h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 1rem;
+    }
+    
+    .section-title p {
+      font-size: 1.1rem;
+      color: var(--gray);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+    
+    .category-card {
+      background: var(--glass-bg);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      text-align: center;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .category-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%, rgba(108, 92, 231, 0.05) 0%, transparent 70%);
+      opacity: 0;
+      transition: var(--transition);
+    }
+    
+    .category-card:hover::before {
+      opacity: 1;
+    }
+    
+    .category-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .category-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--info-light) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    
+    .category-card:hover .category-icon {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .category-card h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 1rem;
+    }
+    
+    .category-card p {
+      color: var(--gray);
+      margin-bottom: 1.5rem;
+    }
+    
+    .category-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+    
+    .category-link:hover {
+      transform: translateX(5px);
+    }
+    
+    /* About Us */
+    .about {
+      padding: 4rem 0;
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.05) 0%, rgba(30, 144, 255, 0.05) 100%);
+    }
+    
+    .about-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+    
+    .about-text h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+    }
+    
+    .about-text p {
+      font-size: 1.1rem;
+      color: var(--gray);
+      margin-bottom: 1.5rem;
+    }
+    
+    .about-features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .feature i {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--success-light) 0%, var(--info-light) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--success);
+      flex-shrink: 0;
+    }
+    
+    .about-image {
+      text-align: center;
+    }
+    
+    .about-image img {
+      max-width: 100%;
+      height: auto;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    /* Contact Us */
+    .contact {
+      padding: 4rem 0;
+      background: white;
+    }
+    
+    .contact-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+    
+    .contact-info h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+    }
+    
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .contact-item i {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--primary-light) 0%, var(--info-light) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+    
+    .contact-item div h4 {
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 0.25rem;
+    }
+    
+    .contact-item div p {
+      color: var(--gray);
+    }
+    
+    .contact-form {
+      background: var(--glass-bg);
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--dark);
+    }
+    
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--gray-light);
+      border-radius: var(--border-radius-sm);
+      font-size: 1rem;
+      transition: var(--transition);
+      background: rgba(255, 255, 255, 0.8);
+    }
+    
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+      background: white;
+    }
+    
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+    
+    .footer {
+      background: linear-gradient(180deg, var(--darker) 0%, var(--dark) 100%);
+      color: white;
+      padding: 3rem 0 1rem;
+    }
+    
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .footer-section h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: white;
+    }
+    
+    .footer-section p,
+    .footer-section li {
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 0.5rem;
+    }
+    
+    .footer-section ul {
+      list-style: none;
+    }
+    
+    .footer-section ul li a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    
+    .footer-section ul li a:hover {
+      color: white;
+      transform: translateX(5px);
+    }
+    
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .social-links a {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    
+    .social-links a:hover {
+      background: var(--primary);
+      transform: translateY(-3px);
+    }
+    
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 1rem;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .floating {
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .mobile-menu-toggle {
+        display: block;
+      }
+      
+      .nav-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        flex-direction: column;
+        padding: 1rem;
+        box-shadow: var(--shadow-md);
+      }
+      
+      .nav-menu.active {
+        display: flex;
+      }
+      
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      
+      .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .about-content,
+      .contact-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .about-features {
+        grid-template-columns: 1fr;
+      }
+      
+      .categories-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .nav-container {
+        padding: 0 1rem;
+      }
+      
+      .hero {
+        padding: 6rem 0 3rem;
+      }
+      
+      .hero-container,
+      .container {
+        padding: 0 1rem;
+      }
+      
+      .section-title h2 {
+        font-size: 2rem;
+      }
+      
+      .about-text h2 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#" class="logo">
+        <i class="fas fa-prescription-bottle-alt"></i>
+        Pharma House
+      </a>
+      <ul class="nav-menu" id="nav-menu">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#categories">Categories</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <a href="login.html" class="nav-login">
+        <i class="fas fa-sign-in-alt"></i> Login
+      </a>
+      <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="hero-container">
+      <h1 class="floating">Your Trusted Pharmacy Partner</h1>
+      <p>Professional pharmaceutical management system designed for modern pharmacies. Streamline your inventory, orders, and operations with our comprehensive solution.</p>
+      <div class="hero-buttons">
+        <a href="index.html" class="btn btn-primary">
+          <i class="fas fa-rocket"></i> Get Started
+        </a>
+        <a href="#about" class="btn btn-outline">
+          <i class="fas fa-info-circle"></i> Learn More
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Medicine Categories -->
+  <section class="categories" id="categories">
+    <div class="container">
+      <div class="section-title">
+        <h2>Medicine Categories</h2>
+        <p>Comprehensive pharmaceutical solutions across all major medicine categories</p>
+      </div>
+      <div class="categories-grid">
+        <div class="category-card">
+          <div class="category-icon">
+            <i class="fas fa-pills"></i>
+          </div>
+          <h3>Painkillers</h3>
+          <p>Comprehensive pain management solutions including NSAIDs, opioids, and specialized analgesics for all types of pain relief.</p>
+          <a href="#" class="category-link">
+            Explore Painkillers <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        
+        <div class="category-card">
+          <div class="category-icon">
+            <i class="fas fa-shield-virus"></i>
+          </div>
+          <h3>Antibiotics</h3>
+          <p>Wide range of antibiotics including penicillins, cephalosporins, macrolides, and specialized antimicrobial agents.</p>
+          <a href="#" class="category-link">
+            Explore Antibiotics <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        
+        <div class="category-card">
+          <div class="category-icon">
+            <i class="fas fa-leaf"></i>
+          </div>
+          <h3>Vitamins & Supplements</h3>
+          <p>Essential vitamins, minerals, and nutritional supplements to support overall health and wellness for all age groups.</p>
+          <a href="#" class="category-link">
+            Explore Vitamins <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        
+        <div class="category-card">
+          <div class="category-icon">
+            <i class="fas fa-heartbeat"></i>
+          </div>
+          <h3>Cardiovascular</h3>
+          <p>Medications for heart health including ACE inhibitors, beta-blockers, calcium channel blockers, and cholesterol management.</p>
+          <a href="#" class="category-link">
+            Explore Cardiovascular <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        
+        <div class="category-card">
+          <div class="category-icon">
+            <i class="fas fa-brain"></i>
+          </div>
+          <h3>Neurological</h3>
+          <p>Specialized medications for neurological conditions including epilepsy, Parkinson's, Alzheimer's, and mental health disorders.</p>
+          <a href="#" class="category-link">
+            Explore Neurological <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        
+        <div class="category-card">
+          <div class="category-icon">
+            <i class="fas fa-lungs"></i>
+          </div>
+          <h3>Respiratory</h3>
+          <p>Complete respiratory care including inhalers, bronchodilators, corticosteroids, and treatments for asthma and COPD.</p>
+          <a href="#" class="category-link">
+            Explore Respiratory <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="about" id="about">
+    <div class="container">
+      <div class="about-content">
+        <div class="about-text">
+          <h2>About Pharma House</h2>
+          <p>With over a decade of experience in pharmaceutical management, Pharma House has been at the forefront of revolutionizing how pharmacies operate and serve their communities.</p>
+          <p>Our comprehensive platform combines cutting-edge technology with deep industry expertise to provide pharmacies with the tools they need to manage inventory, process orders, handle payments, and ensure compliance with regulatory requirements.</p>
+          <div class="about-features">
+            <div class="feature">
+              <i class="fas fa-check-circle"></i>
+              <span>24/7 System Reliability</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-shield-alt"></i>
+              <span>Secure & Compliant</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-users"></i>
+              <span>Expert Support Team</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-chart-line"></i>
+              <span>Advanced Analytics</span>
+            </div>
+          </div>
+        </div>
+        <div class="about-image">
+          <img src="./assets/ images/pharmacy-logo-vector_23987-171.avif" alt="Modern Pharmacy" class="floating">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <div class="container">
+      <div class="section-title">
+        <h2>Contact Us</h2>
+        <p>Get in touch with our expert team for support, inquiries, or partnership opportunities</p>
+      </div>
+      <div class="contact-content">
+        <div class="contact-info">
+          <h3>Get In Touch</h3>
+          <div class="contact-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <div>
+              <h4>Address</h4>
+              <p>123 Pharmacy Street, Medical District<br>Cairo, Egypt 11451</p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-phone"></i>
+            <div>
+              <h4>Phone</h4>
+              <p>+20 2 1234 5678<br>+20 100 123 4567</p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <div>
+              <h4>Email</h4>
+              <p>info@pharmahouse.com<br>support@pharmahouse.com</p>
+            </div>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-clock"></i>
+            <div>
+              <h4>Business Hours</h4>
+              <p>Monday - Friday: 8:00 AM - 6:00 PM<br>Saturday: 9:00 AM - 4:00 PM</p>
+            </div>
+          </div>
+        </div>
+        <div class="contact-form">
+          <form onsubmit="submitContactForm(event)">
+            <div class="form-group">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+              <label for="pharmacy">Pharmacy Name</label>
+              <input type="text" id="pharmacy" name="pharmacy">
+            </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" placeholder="Tell us how we can help you..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+              <i class="fas fa-paper-plane"></i> Send Message
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>Pharma House</h3>
+          <p>Your trusted partner in pharmaceutical management, providing comprehensive solutions for modern pharmacies worldwide.</p>
+          <div class="social-links">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#categories">Medicine Categories</a></li>
+            <li><a href="#about">About Us</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="index.html">Pharmacy Login</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Services</h3>
+          <ul>
+            <li><a href="#">Inventory Management</a></li>
+            <li><a href="#">Order Processing</a></li>
+            <li><a href="#">Payment Solutions</a></li>
+            <li><a href="#">Analytics & Reports</a></li>
+            <li><a href="#">24/7 Support</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Contact Info</h3>
+          <p><i class="fas fa-map-marker-alt"></i> 123 Pharmacy Street, Cairo, Egypt</p>
+          <p><i class="fas fa-phone"></i> +20 2 1234 5678</p>
+          <p><i class="fas fa-envelope"></i> info@pharmahouse.com</p>
+          <p><i class="fas fa-clock"></i> Mon-Fri: 8AM-6PM</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2023 Pharma House. All rights reserved. | Privacy Policy | Terms of Service</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function toggleMobileMenu() {
+      const navMenu = document.getElementById('nav-menu');
+      navMenu.classList.toggle('active');
+    }
+
+    function submitContactForm(event) {
+      event.preventDefault();
+      
+      const formData = new FormData(event.target);
+      const data = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        pharmacy: formData.get('pharmacy'),
+        message: formData.get('message')
+      };
+      
+      // Simulate form submission
+      alert('Thank you for your message! We will get back to you within 24 hours.');
+      event.target.reset();
+    }
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Add scroll effect to navbar
+    window.addEventListener('scroll', function() {
+      const navbar = document.querySelector('.navbar');
+      if (window.scrollY > 100) {
+        navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+      } else {
+        navbar.style.background = 'rgba(255, 255, 255, 0.85)';
+      }
+    });
+
+    // Animate elements on scroll
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.category-card, .about-content, .contact-content').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

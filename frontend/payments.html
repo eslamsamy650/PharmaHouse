@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PharmaCare | Payments</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+     :root {
+      --primary: #6c5ce7;
+      --primary-light: rgba(108, 92, 231, 0.1);
+      --primary-dark: #5649c0;
+      --danger: #ff4757;
+      --danger-light: rgba(255, 71, 87, 0.1);
+      --warning: #ffa502;
+      --warning-light: rgba(255, 165, 2, 0.1);
+      --success: #2ed573;
+      --success-light: rgba(46, 213, 115, 0.1);
+      --info: #1e90ff;
+      --info-light: rgba(30, 144, 255, 0.1);
+      --dark: #2f3542;
+      --darker: #1e272e;
+      --light: #f8f9fa;
+      --gray: #a4b0be;
+      --gray-light: #dfe6e9;
+      --sidebar-width: 280px;
+      --transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+      --border-radius: 12px;
+      --border-radius-sm: 8px;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: #f8f9fa;
+      color: var(--dark);
+    }
+    
+       .sidebar {
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, var(--darker) 0%, var(--dark) 100%);
+      height: 100vh;
+      position: fixed;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+      z-index: 100;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+    
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .sidebar-header h2 {
+      color: white;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin: 0;
+      background: linear-gradient(90deg, #fff 0%, #a5b1c2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .sidebar-header img {
+      width: 36px;
+      height: 36px;
+      filter: brightness(0) invert(1);
+    }
+    
+    .sidebar-menu {
+      padding: 1rem 0;
+    }
+    
+      .menu-item {
+      padding: 0.85rem 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      margin: 0.25rem 0.5rem;
+      border-radius: var(--border-radius-sm);
+      transition: var(--transition);
+      color: rgba(255, 255, 255, 0.7);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      font-size: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .menu-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: var(--transition);
+    }
+    
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      transform: translateX(5px);
+    }
+    
+    .menu-item:hover::before {
+      left: 100%;
+    }
+    
+    .menu-item.active {
+      background: rgba(108, 92, 231, 0.2);
+      color: white;
+      font-weight: 600;
+      box-shadow: inset 0 0 10px rgba(108, 92, 231, 0.3);
+    }
+    
+    .menu-item.active::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: var(--primary);
+      border-radius: 0 4px 4px 0;
+    }
+    
+    .menu-item i {
+      margin-right: 0.75rem;
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+    
+ 
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 2rem;
+      transition: var(--transition);
+      min-height: 100vh;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .page-title h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    .page-title i {
+      font-size: 1.8rem;
+      color: var(--primary);
+      background: rgba(108, 92, 231, 0.1);
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .user-info {
+      font-weight: 500;
+      color: var(--light-dark);
+    }
+    
+    .user-info span {
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    .payment-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: none;
+    }
+    
+    .payment-tab {
+      padding: 0.75rem 1.5rem;
+      cursor: pointer;
+      border-radius: 50px;
+      font-weight: 500;
+      transition: var(--transition);
+      background: rgba(0, 0, 0, 0.03);
+      color: var(--light-dark);
+    }
+    
+    .payment-tab.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+    }
+    
+    .payment-tab:hover:not(.active) {
+      background: rgba(108, 92, 231, 0.1);
+      color: var(--primary);
+    }
+    .payment-container {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 2rem;
+    }
+    
+    .payment-methods, .payment-details {
+      background: white;
+      border-radius: 16px;
+      padding: 1.8rem;
+      box-shadow: var(--card-shadow);
+      transition: var(--transition);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .payment-methods:hover, .payment-details:hover {
+      box-shadow: 0 15px 30px rgba(108, 92, 231, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    .payment-methods h2, .payment-details h2 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    .payment-method {
+      display: flex;
+      align-items: center;
+      padding: 1.2rem;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      background: white;
+    }
+    
+    .payment-method:hover {
+      border-color: var(--primary-light);
+      box-shadow: 0 5px 15px rgba(108, 92, 231, 0.1);
+    }
+    
+    .payment-method.active {
+      border-color: var(--primary);
+      background: rgba(108, 92, 231, 0.05);
+      box-shadow: 0 5px 15px rgba(108, 92, 231, 0.1);
+    }
+    
+    .payment-method i {
+      font-size: 1.8rem;
+      margin-right: 1.2rem;
+      color: var(--primary);
+      background: rgba(108, 92, 231, 0.1);
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .payment-method h3 {
+      margin: 0 0 0.25rem 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+    .payment-method p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: var(--light-dark);
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.75rem;
+      font-weight: 500;
+      color: var(--light-dark);
+    }
+    
+    .form-control {
+      width: 80%;
+      padding: 0.9rem 1.2rem;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: var(--transition);
+      background: rgba(0, 0, 0, 0.02);
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+      background: white;
+    }
+    
+    .card-icons {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+    
+    .card-icon {
+      width: 45px;
+      height: 30px;
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--light-dark);
+    }
+    
+    .payment-summary {
+      margin-top: 2rem;
+      padding: 1.8rem;
+      background: linear-gradient(135deg, rgba(108, 92, 231, 0.05) 0%, rgba(162, 155, 254, 0.05) 100%);
+      border-radius: 12px;
+      border: 1px solid rgba(108, 92, 231, 0.1);
+    }
+    
+    .payment-summary h3 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.9rem;
+      font-size: 0.95rem;
+    }
+    
+    .summary-total {
+      font-weight: 600;
+      font-size: 1.1rem;
+      border-top: 1px solid rgba(108, 92, 231, 0.2);
+      padding-top: 0.9rem;
+      margin-top: 0.9rem;
+      color: var(--primary);
+    }
+    
+    .btn {
+      padding: 0.9rem 1.8rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      font-weight: 500;
+      transition: var(--transition);
+      font-size: 1rem;
+    }
+    
+    .btn-primary {
+      background: var(--bg-gradient);
+      color: white;
+      box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3);
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+    }
+    
+    .btn-outline {
+      background: white;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+    
+    .btn-outline:hover {
+      background: rgba(108, 92, 231, 0.05);
+    }
+    
+    .payment-history {
+      margin-top: 2rem;
+    }
+    
+    .payment-history-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .payment-history-table th {
+      padding: 1.2rem;
+      text-align: left;
+      background: rgba(108, 92, 231, 0.05);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    
+    .payment-history-table td {
+      padding: 1.2rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .payment-history-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .payment-history-table tr:hover {
+      background: rgba(108, 92, 231, 0.03);
+    }
+    
+    .payment-status {
+      display: inline-block;
+      padding: 0.4rem 0.8rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .status-completed {
+      background: rgba(0, 184, 148, 0.1);
+      color: var(--success);
+    }
+    
+    .status-pending {
+      background: rgba(253, 203, 110, 0.1);
+      color: var(--warning);
+    }
+    
+    .status-failed {
+      background: rgba(255, 118, 117, 0.1);
+      color: var(--danger);
+    }
+    
+    .view-receipt-btn {
+      color: var(--primary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+      padding: 0.5rem;
+      border-radius: 6px;
+    }
+    
+    .view-receipt-btn:hover {
+      background: rgba(108, 92, 231, 0.1);
+    }
+    
+    .pagination {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .pagination span {
+      color: var(--light-dark);
+    }
+    
+    @media (max-width: 1200px) {
+      .payment-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .sidebar {
+        width: 240px;
+      }
+      
+      .main-content {
+        margin-left: 240px;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+    }
+    
+    .payment-section {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    .payment-section.active {
+      display: block;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .sidebar-header {
+      animation: float 4s ease-in-out infinite;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fab {
+      display: none;
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--bg-gradient);
+      color: white;
+      box-shadow: 0 5px 20px rgba(108, 92, 231, 0.4);
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    @media (max-width: 992px) {
+      .fab {
+        display: flex;
+      }
+    }
+    
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--primary-light);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <img src="https://cdn-icons-png.flaticon.com/512/3952/3952026.png" alt="Pharmacy Icon">
+      <h2>PharmaCare</h2>
+    </div>
+    <div class="sidebar-menu">
+      <div class="menu-item" onclick="window.location.href='dashboard.html'">
+        <i class="fas fa-chart-line"></i> Dashboard
+      </div>
+        <div class="menu-item" onclick="window.location.href='ProfilePage.html'">
+        <i class="fas fa-box-open"></i> Pharmacy Profile
+      </div>
+      <div class="menu-item" id="inventory-menu-item" onclick="window.location.href='inventory.html'">
+        <i class="fas fa-pills"></i> Inventory
+      </div>
+     
+        <div class="menu-item" onclick="window.location.href='SpecialOffers.html'">
+        <i class="fas fa-credit-card"></i> Pharmacy Offers
+      </div>
+      <div class="menu-item" onclick="window.location.href='orders.html'">
+        <i class="fas fa-box-open"></i> Orders
+      </div>
+      
+      <div class="menu-item active" onclick="window.location.href='payments.html'">
+        <i class="fas fa-credit-card"></i> Payments
+      </div>
+  
+      <div class="menu-item" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </div>
+    </div>
+  </div>
+
+  <button class="fab" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <div class="main-content">
+    <div class="header">
+      <div class="page-title">
+        <i class="fas fa-credit-card"></i>
+        <h1>Payment Management</h1>
+      </div>
+      <div class="user-info">
+        Welcome, <span id="pharmacy-name-payments">Loading...</span>
+      </div>
+    </div>
+
+    <div class="payment-tabs">
+      <div class="payment-tab active" onclick="showPaymentTab('make-payment', event)">Make Payment</div>
+      <div class="payment-tab" onclick="showPaymentTab('payment-history', event)">Payment History</div>
+    </div>
+
+    <div id="make-payment-tab" class="payment-section active">
+      <div class="payment-container">
+        <div class="payment-methods">
+          <h2>Payment Method</h2>
+          <div class="payment-method active" onclick="selectPaymentMethod('credit-card', event)">
+            <i class="far fa-credit-card"></i>
+            <div>
+              <h3>Credit/Debit Card</h3>
+              <p>Pay with Visa, Mastercard, or other cards</p>
+            </div>
+          </div>
+          <div class="payment-method" onclick="selectPaymentMethod('bank-transfer', event)">
+            <i class="fas fa-university"></i>
+            <div>
+              <h3>Bank Transfer</h3>
+              <p>Direct transfer from your bank account</p>
+            </div>
+          </div>
+          <div class="payment-method" onclick="selectPaymentMethod('mobile-money', event)">
+            <i class="fas fa-mobile-alt"></i>
+            <div>
+              <h3>Mobile Money</h3>
+              <p>Pay via mobile money services</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="payment-details">
+          <h2>Payment Details</h2>
+          <div id="credit-card-form">
+            <div class="form-group">
+              <label for="card-number">Card Number</label>
+              <input type="text" id="card-number" class="form-control" placeholder="1234 5678 9012 3456">
+              <div class="card-icons">
+                <div class="card-icon">VISA</div>
+                <div class="card-icon">MC</div>
+                <div class="card-icon">AMEX</div>
+                <div class="card-icon">DIS</div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="card-name">Cardholder Name</label>
+              <input type="text" id="card-name" class="form-control" placeholder="John Doe">
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label for="expiry-date">Expiry Date</label>
+                <input type="text" id="expiry-date" class="form-control" placeholder="MM/YY">
+              </div>
+              <div class="form-group">
+                <label for="cvv">CVV</label>
+                <input type="text" id="cvv" class="form-control" placeholder="123">
+              </div>
+            </div>
+          </div>
+
+          <div id="bank-transfer-form" style="display: none;">
+            <div class="form-group">
+              <label>Bank Account Details</label>
+              <p>Please transfer the payment amount to:</p>
+              <p><strong>Bank:</strong> PharmaCare Bank</p>
+              <p><strong>Account Name:</strong> PharmaCare Inc.</p>
+              <p><strong>Account Number:</strong> 1234567890</p>
+              <p><strong>SWIFT/BIC:</strong> PHARMA123</p>
+              <p>Use your order number as reference</p>
+            </div>
+          </div>
+
+          <div id="mobile-money-form" style="display: none;">
+            <div class="form-group">
+              <label for="mobile-provider">Mobile Provider</label>
+              <select id="mobile-provider" class="form-control">
+                <option value="">Select Provider</option>
+                <option value="vodafone">Vodafone Cash</option>
+                <option value="mtn">MTN Mobile Money</option>
+                <option value="airtel">Airtel Money</option>
+                <option value="orange">Orange Money</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="mobile-number">Mobile Number</label>
+              <input type="text" id="mobile-number" class="form-control" placeholder="0501234567">
+            </div>
+          </div>
+
+          <div class="payment-summary">
+            <h3>Order Summary</h3>
+            <div id="payment-order-summary">
+            </div>
+            <div class="summary-item summary-total">
+              <span>Total Amount Due:</span>
+              <span id="payment-total">$0.00</span>
+            </div>
+          </div>
+          <div class="payment-actions" style="margin-top: 1.5rem; text-align: center;">
+  <button class="btn btn-primary" style="color: #6c5ce7; width: 50%; margin:auto" onclick="processPayment()">
+    <i class="fas fa-lock"></i> Confirm Payment
+  </button>
+</div>
+
+         
+        </div>
+      </div>
+    </div>
+
+    <div id="payment-history-tab" class="payment-section">
+      <div class="payment-history">
+        <div class="payment-history-controls">
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+            <input type="text" id="payment-search" placeholder="Search payments..." class="form-control" style="flex: 1;">
+            <select id="payment-status-filter" class="form-control">
+              <option value="all">All Statuses</option>
+              <option value="Paid">Paid</option>
+              <option value="Pending">Pending</option>
+              <option value="Cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+        
+        <table class="payment-history-table">
+          <thead>
+            <tr>
+              <th>Payment ID</th>
+              <th>Date</th>
+              <th>Order ID</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="payment-history-body">
+          </tbody>
+        </table>
+        
+        <div class="pagination" id="payment-pagination" style="margin-top: 1rem; display: flex; justify-content: center; gap: 1rem;">
+          <!-- Pagination will be dynamically generated -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./assets/js/api.js"></script>
+  <script>
+    const pharmacy = JSON.parse(localStorage.getItem('pharmacy'));
+    if (!pharmacy || !localStorage.getItem('token')) {
+      window.location.href = 'login.html';
+    } else {
+      document.getElementById('pharmacy-name-payments').textContent = pharmacy.username || pharmacy.fullName || 'User';
+    }
+
+    async function loadUserRole() {
+      try {
+        const profile = await profileAPI.get();
+        if (profile && profile.user) {
+          const userRole = profile.user.Role || '';
+          const isAdmin = userRole === 'admin';
+          
+          // Hide inventory menu item for normal users
+          const inventoryMenuItem = document.getElementById('inventory-menu-item');
+          if (inventoryMenuItem) {
+            inventoryMenuItem.style.display = isAdmin ? 'flex' : 'none';
+          }
+        }
+      } catch (error) {
+      }
+    }
+
+    // Load user role on page load
+    loadUserRole();
+
+    let invoicesData = [];
+    let filteredInvoices = [];
+    let pendingOrder = null;
+    let pendingOrderId = null;
+    let pendingInvoiceId = null;
+    let currentPaymentPage = 1;
+    const paymentsPerPage = 10;
+
+    let currentPaymentMethod = 'credit-card';
+    let currentPaymentTab = 'make-payment';
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check for pending order from localStorage (from orders page)
+      pendingOrderId = localStorage.getItem('pendingOrderId');
+      pendingInvoiceId = localStorage.getItem('pendingInvoiceId');
+      
+      if (pendingOrderId && pendingInvoiceId) {
+        // Fetch order details
+        loadPendingOrder(pendingOrderId, pendingInvoiceId);
+      } else {
+        // Check for old format
+        const storedOrder = JSON.parse(localStorage.getItem('pendingPayment') || 'null');
+        if (storedOrder) {
+          pendingOrder = storedOrder;
+          renderPaymentOrderSummary(storedOrder);
+        } else {
+          // If no pending order, show message
+          const container = document.getElementById('payment-order-summary');
+          if (container) {
+            container.innerHTML = '<p style="text-align: center; color: var(--gray); padding: 1rem;">No pending payment. Create an order first.</p>';
+          }
+        }
+      }
+      
+      loadInvoices();
+      
+      // Add event listener for payment status filter
+      const statusFilter = document.getElementById('payment-status-filter');
+      if (statusFilter) {
+        statusFilter.addEventListener('change', filterPaymentHistory);
+      }
+    });
+    
+    async function loadPendingOrder(orderId, invoiceId) {
+      try {
+        // Fetch invoice details
+        const invoice = await invoicesAPI.getById(invoiceId);
+        if (invoice) {
+          pendingOrder = {
+            id: orderId,
+            OrderID: orderId,
+            TotalAmount: invoice.TotalAmount,
+            subtotal: invoice.TotalAmount,
+            total: invoice.TotalAmount
+          };
+          renderPaymentOrderSummary(pendingOrder);
+        }
+      } catch (error) {
+      }
+    }
+
+    async function loadInvoices() {
+      try {
+        invoicesData = await invoicesAPI.getAll();
+        filteredInvoices = [...invoicesData];
+        filterPaymentHistory();
+      } catch (error) {
+        invoicesData = [];
+        filteredInvoices = [];
+      }
+    }
+    
+    function filterPaymentHistory() {
+      const statusFilter = document.getElementById('payment-status-filter')?.value || 'all';
+      
+      filteredInvoices = invoicesData.filter(invoice => {
+        if (statusFilter === 'all') return true;
+        return invoice.PaymentStatus === statusFilter;
+      });
+      
+      currentPaymentPage = 1; // Reset to first page on filter
+      renderPaymentHistory();
+    }
+
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('active');
+    }
+
+    function showPaymentTab(tabId, event) {
+      currentPaymentTab = tabId;
+      
+      document.querySelectorAll('.payment-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+      } else {
+        // Fallback: find the tab by tabId
+        document.querySelectorAll('.payment-tab').forEach(tab => {
+          if (tab.textContent.includes(tabId === 'make-payment' ? 'Make Payment' : 'Payment History')) {
+            tab.classList.add('active');
+          }
+        });
+      }
+      
+      document.querySelectorAll('.payment-section').forEach(section => {
+        section.classList.remove('active');
+      });
+      document.getElementById(`${tabId}-tab`).classList.add('active');
+      
+      if (tabId === 'payment-history') {
+        renderPaymentHistory();
+      }
+    }
+
+    function selectPaymentMethod(method, event) {
+      currentPaymentMethod = method;
+      
+      document.querySelectorAll('.payment-method').forEach(item => {
+        item.classList.remove('active');
+      });
+      if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+      } else {
+        // Fallback: find the method by ID
+        const methodElement = document.querySelector(`[onclick*="selectPaymentMethod('${method}')"]`);
+        if (methodElement) {
+          methodElement.classList.add('active');
+        }
+      }
+      
+      document.getElementById('credit-card-form').style.display = 'none';
+      document.getElementById('bank-transfer-form').style.display = 'none';
+      document.getElementById('mobile-money-form').style.display = 'none';
+      
+      document.getElementById(`${method}-form`).style.display = 'block';
+    }
+
+    function renderPaymentOrderSummary(order) {
+      const container = document.getElementById('payment-order-summary');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      
+      if (!order) {
+        container.innerHTML = '<p style="text-align: center; color: var(--gray);">No order selected for payment</p>';
+        document.getElementById('payment-total').textContent = '$0.00';
+        return;
+      }
+      
+      const orderInfo = document.createElement('div');
+      orderInfo.className = 'summary-item';
+      orderInfo.innerHTML = `
+        <span>Order ID:</span>
+        <span>${order.id || order.OrderID || 'N/A'}</span>
+      `;
+      container.appendChild(orderInfo);
+      
+      if (order.supplierName) {
+        const supplierInfo = document.createElement('div');
+        supplierInfo.className = 'summary-item';
+        supplierInfo.innerHTML = `
+          <span>Supplier:</span>
+          <span>${order.supplierName}</span>
+        `;
+        container.appendChild(supplierInfo);
+      }
+      
+      if (order.items) {
+        const itemsInfo = document.createElement('div');
+        itemsInfo.className = 'summary-item';
+        itemsInfo.innerHTML = `
+          <span>Items:</span>
+          <span>${order.items.length}</span>
+        `;
+        container.appendChild(itemsInfo);
+      }
+      
+      const subtotalInfo = document.createElement('div');
+      subtotalInfo.className = 'summary-item';
+      subtotalInfo.innerHTML = `
+        <span>Subtotal:</span>
+        <span>$${parseFloat(order.subtotal || order.TotalAmount || 0).toFixed(2)}</span>
+      `;
+      container.appendChild(subtotalInfo);
+      
+      if (order.priority && order.priority !== 'normal') {
+        const priorityFee = order.total - order.subtotal;
+        const priorityInfo = document.createElement('div');
+        priorityInfo.className = 'summary-item';
+        priorityInfo.innerHTML = `
+          <span>${order.priority === 'urgent' ? 'Urgent Fee' : 'Emergency Fee'}:</span>
+          <span>$${priorityFee.toFixed(2)}</span>
+        `;
+        container.appendChild(priorityInfo);
+      }
+      
+      document.getElementById('payment-total').textContent = `$${parseFloat(order.total || order.TotalAmount || 0).toFixed(2)}`;
+    }
+
+    async function processPayment() {
+      if (!pendingOrder && !pendingInvoiceId) {
+        alert('No order selected for payment');
+        return;
+      }
+      
+      let isValid = true;
+      let paymentDetails = {};
+      let paymentMethod = 'credit-card';
+      
+      if (currentPaymentMethod === 'credit-card') {
+        const cardNumber = document.getElementById('card-number').value;
+        const cardName = document.getElementById('card-name').value;
+        const expiryDate = document.getElementById('expiry-date').value;
+        const cvv = document.getElementById('cvv').value;
+        
+        if (!cardNumber || !cardName || !expiryDate || !cvv) {
+          isValid = false;
+          alert('Please fill all credit card details');
+        } else {
+          paymentDetails = {
+            method: 'credit-card',
+            cardLast4: cardNumber.slice(-4),
+            cardName
+          };
+          paymentMethod = 'Credit Card';
+        }
+      } else if (currentPaymentMethod === 'mobile-money') {
+        const provider = document.getElementById('mobile-provider').value;
+        const mobileNumber = document.getElementById('mobile-number').value;
+        
+        if (!provider || !mobileNumber) {
+          isValid = false;
+          alert('Please select mobile provider and enter your number');
+        } else {
+          paymentDetails = {
+            method: 'mobile-money',
+            provider,
+            mobileNumber
+          };
+        }
+      } else {
+        paymentDetails = {
+          method: 'bank-transfer'
+        };
+      }
+      
+      if (!isValid) return;
+      
+      try {
+        // Use pendingInvoiceId if available, otherwise find invoice
+        let invoiceId = pendingInvoiceId;
+        if (!invoiceId && pendingOrder) {
+          const orderId = pendingOrder.id || pendingOrder.OrderID;
+          const invoice = invoicesData.find(inv => inv.OrderID === orderId);
+          invoiceId = invoice ? invoice.InvoiceID : null;
+        }
+        
+        if (!invoiceId) {
+          alert('Invoice not found for this order');
+          return;
+        }
+        
+        // Mark as paid (all payment methods complete payment for demo)
+        const paymentStatus = 'Paid';
+        paymentMethod = currentPaymentMethod === 'credit-card' ? 'Credit Card' : 
+                       currentPaymentMethod === 'mobile-money' ? 'Mobile Money' : 
+                       'Bank Transfer';
+        
+        await invoicesAPI.updatePayment(invoiceId, paymentStatus, paymentMethod);
+        
+        // Clear pending order
+        pendingOrder = null;
+        pendingOrderId = null;
+        pendingInvoiceId = null;
+        localStorage.removeItem('pendingPayment');
+        localStorage.removeItem('pendingOrderId');
+        localStorage.removeItem('pendingInvoiceId');
+        
+        alert('Payment completed successfully!');
+        
+        // Reload invoices and switch to history tab
+        await loadInvoices();
+        showPaymentTab('payment-history');
+      } catch (error) {
+        alert('Error processing payment: ' + (error.message || 'Please try again'));
+      }
+    }
+
+    function generatePaymentId() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const random = Math.floor(Math.random() * 900) + 100;
+      return `PAY-${year}${month}${day}-${random}`;
+    }
+
+    function renderPaymentHistory() {
+      const tbody = document.getElementById('payment-history-body');
+      if (!tbody) return;
+      
+      tbody.innerHTML = '';
+      
+      if (filteredInvoices.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--gray);">No payment history found</td></tr>';
+        updatePaymentPagination(0);
+        return;
+      }
+      
+      // Calculate pagination
+      const totalPages = Math.ceil(filteredInvoices.length / paymentsPerPage);
+      const startIndex = (currentPaymentPage - 1) * paymentsPerPage;
+      const endIndex = startIndex + paymentsPerPage;
+      const pageInvoices = filteredInvoices.slice(startIndex, endIndex);
+      
+      // Reset to page 1 if current page is out of bounds
+      if (currentPaymentPage > totalPages && totalPages > 0) {
+        currentPaymentPage = 1;
+        return renderPaymentHistory();
+      }
+      
+      pageInvoices.forEach(invoice => {
+        const invoiceDate = invoice.InvoiceDate ? new Date(invoice.InvoiceDate).toLocaleDateString() : 'N/A';
+        const orderDate = invoice.OrderDate ? new Date(invoice.OrderDate).toLocaleDateString() : 'N/A';
+        const status = invoice.PaymentStatus === 'Paid' ? 'completed' : 
+                      invoice.PaymentStatus === 'Pending' ? 'pending' : 'failed';
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>INV-${invoice.InvoiceID}</td>
+          <td>${invoiceDate}</td>
+          <td>ORD-${invoice.OrderID}</td>
+          <td>$${parseFloat(invoice.TotalAmount || 0).toFixed(2)}</td>
+          <td>Invoice Payment</td>
+          <td><span class="payment-status status-${status}">${formatPaymentStatus(status)}</span></td>
+          <td>
+            <button class="view-receipt-btn" onclick="viewReceipt(${invoice.InvoiceID})">
+              <i class="fas fa-receipt"></i> Receipt
+            </button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+      
+      // Update pagination
+      updatePaymentPagination(filteredInvoices.length);
+    }
+    
+    function updatePaymentPagination(totalItems) {
+      const paginationDiv = document.getElementById('payment-pagination');
+      if (!paginationDiv) return;
+      
+      const totalPages = Math.ceil(totalItems / paymentsPerPage);
+      
+      // Hide pagination if items don't exceed one page
+      if (totalItems <= paymentsPerPage) {
+        paginationDiv.style.display = 'none';
+        return;
+      }
+      
+      // Show pagination
+      paginationDiv.style.display = 'flex';
+      
+      // Update pagination HTML
+      paginationDiv.innerHTML = `
+        <button class="btn btn-outline" onclick="changePaymentPage(-1)" ${currentPaymentPage === 1 ? 'disabled' : ''}>
+          <i class="fas fa-chevron-left"></i> Previous
+        </button>
+        <span style="margin: 0 1rem;">Page ${currentPaymentPage} of ${totalPages}</span>
+        <button class="btn btn-outline" onclick="changePaymentPage(1)" ${currentPaymentPage === totalPages ? 'disabled' : ''}>
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
+      `;
+    }
+    
+    function changePaymentPage(direction) {
+      const totalPages = Math.ceil(filteredInvoices.length / paymentsPerPage);
+      
+      if (direction > 0 && currentPaymentPage < totalPages) {
+        currentPaymentPage++;
+        renderPaymentHistory();
+      } else if (direction < 0 && currentPaymentPage > 1) {
+        currentPaymentPage--;
+        renderPaymentHistory();
+      }
+    }
+
+    function formatPaymentStatus(status) {
+      const statusMap = {
+        'completed': 'Completed',
+        'pending': 'Pending',
+        'failed': 'Failed'
+      };
+      return statusMap[status] || status;
+    }
+
+    async function viewReceipt(invoiceId) {
+      try {
+        const invoice = await invoicesAPI.getById(invoiceId);
+        const invoiceDate = invoice.InvoiceDate ? new Date(invoice.InvoiceDate).toLocaleDateString() : 'N/A';
+        const status = invoice.PaymentStatus === 'Paid' ? 'completed' : 
+                      invoice.PaymentStatus === 'Pending' ? 'pending' : 'failed';
+        
+        const modalHtml = `
+          <div style="padding: 2rem; max-width: 600px; background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+              <h2 style="margin-bottom: 0.5rem; color: var(--primary);">PharmaCare</h2>
+              <p style="color: var(--gray);">123 Pharma Street, Medical City</p>
+              <p style="color: var(--gray);">Tax ID: PH123456789</p>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+              <div>
+                <h3 style="margin-bottom: 0.5rem; color: var(--dark);">Invoice Receipt</h3>
+                <p><strong>Invoice #:</strong> INV-${invoice.InvoiceID}</p>
+                <p><strong>Date:</strong> ${invoiceDate}</p>
+              </div>
+              <div style="text-align: right;">
+                <div class="payment-status status-${status}" style="margin-bottom: 0.5rem; display: inline-block;">
+                  ${formatPaymentStatus(status)}
+                </div>
+                <p><strong>Order #:</strong> ORD-${invoice.OrderID}</p>
+              </div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+              <h3 style="margin-bottom: 0.5rem; color: var(--dark);">Payment Details</h3>
+              <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                  <tr style="border-bottom: 1px solid rgba(0,0,0,0.1);">
+                    <th style="padding: 0.75rem; text-align: left;">Description</th>
+                    <th style="padding: 0.75rem; text-align: right;">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="padding: 0.75rem;">Order Payment</td>
+                    <td style="padding: 0.75rem; text-align: right;">$${parseFloat(invoice.TotalAmount || 0).toFixed(2)}</td>
+                  </tr>
+                  <tr style="border-top: 1px solid rgba(0,0,0,0.1); font-weight: 600;">
+                    <td style="padding: 0.75rem;">Total Amount</td>
+                    <td style="padding: 0.75rem; text-align: right; color: var(--primary);">$${parseFloat(invoice.TotalAmount || 0).toFixed(2)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div style="margin-top: 2rem; text-align: center; color: var(--gray); font-size: 0.9rem;">
+              <p>Thank you for your business!</p>
+              <p>For any inquiries, please contact support@pharmacare.com</p>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+              <button onclick="closeModal()" style="padding: 0.75rem 1.5rem; background: rgba(0,0,0,0.05); border: none; border-radius: 8px; cursor: pointer;">
+                Close
+              </button>
+              <button onclick="printReceipt()" style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%); color: white; border: none; border-radius: 8px; cursor: pointer;">
+                <i class="fas fa-print"></i> Print
+              </button>
+            </div>
+          </div>
+        `;
+        
+        const modal = document.createElement('div');
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+        modal.style.display = 'flex';
+        modal.style.justifyContent = 'center';
+        modal.style.alignItems = 'center';
+        modal.style.zIndex = '1000';
+        modal.style.backdropFilter = 'blur(5px)';
+        modal.innerHTML = modalHtml;
+        
+        modal.querySelector('button[onclick="closeModal()"]').addEventListener('click', () => {
+          document.body.removeChild(modal);
+        });
+        
+        document.body.appendChild(modal);
+      } catch (error) {
+        alert('Error loading receipt: ' + (error.message || 'Please try again'));
+      }
+    }
+
+    function printReceipt() {
+      alert('In a real app, this would print the receipt or generate a PDF');
+    }
+
+    function closeModal() {
+      const modals = document.querySelectorAll('body > div[style*="position: fixed;"]');
+      modals.forEach(modal => document.body.removeChild(modal));
+    }
+
+    function changePaymentPage(direction) {
+      alert(`In a real app, this would load page ${direction > 0 ? 'next' : 'previous'} page of payments`);
+    }
+
+    function logout() {
+      if (typeof authAPI !== 'undefined') {
+        authAPI.logout();
+      } else {
+        localStorage.removeItem('pharmacy');
+        localStorage.removeItem('token');
+        localStorage.removeItem('isAuthenticated');
+      }
+      window.location.href = 'index.html';
+    }
+  </script>
+</body>
+</html>

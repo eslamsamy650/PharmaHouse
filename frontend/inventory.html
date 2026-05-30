@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PharmaCare | Inventory</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6c5ce7;
+      --primary-light: rgba(108, 92, 231, 0.1);
+      --primary-dark: #5649c0;
+      --danger: #ff4757;
+      --danger-light: rgba(255, 71, 87, 0.1);
+      --warning: #ffa502;
+      --warning-light: rgba(255, 165, 2, 0.1);
+      --success: #2ed573;
+      --success-light: rgba(46, 213, 115, 0.1);
+      --info: #1e90ff;
+      --info-light: rgba(30, 144, 255, 0.1);
+      --dark: #2f3542;
+      --darker: #1e272e;
+      --light: #f8f9fa;
+      --gray: #a4b0be;
+      --gray-light: #dfe6e9;
+      --sidebar-width: 280px;
+      --transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+      --border-radius: 12px;
+      --border-radius-sm: 8px;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #f1f5f9 100%);
+      color: var(--dark);
+    }
+    
+    .sidebar {
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, var(--darker) 0%, var(--dark) 100%);
+      height: 100vh;
+      position: fixed;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+      z-index: 100;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+    
+    .sidebar-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .sidebar-header h2 {
+      color: white;
+      font-weight: 700;
+      font-size: 1.5rem;
+      background: linear-gradient(90deg, #fff 0%, #a5b1c2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+    
+    .sidebar-header img {
+      width: 36px;
+      height: 36px;
+      filter: brightness(0) invert(1);
+    }
+    
+    .sidebar-menu {
+      padding: 1rem 0;
+    }
+    
+    .menu-item {
+      padding: 0.85rem 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      margin: 0.25rem 0.5rem;
+      border-radius: var(--border-radius-sm);
+      transition: var(--transition);
+      color: rgba(255, 255, 255, 0.7);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      font-size: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .menu-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: var(--transition);
+    }
+    
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      transform: translateX(5px);
+    }
+    
+    .menu-item:hover::before {
+      left: 100%;
+    }
+    
+    .menu-item.active {
+      background: rgba(108, 92, 231, 0.2);
+      color: white;
+      font-weight: 600;
+      box-shadow: inset 0 0 10px rgba(108, 92, 231, 0.3);
+    }
+    
+    .menu-item.active::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: var(--primary);
+      border-radius: 0 4px 4px 0;
+    }
+    
+    .menu-item i {
+      margin-right: 0.75rem;
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+    }
+    
+    .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 2rem;
+      transition: var(--transition);
+      min-height: 100vh;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.98) 100%);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .page-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .page-title h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 0;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--info) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .page-title i {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+    
+    .user-info {
+      background: linear-gradient(90deg, var(--primary-light) 0%, var(--info-light) 100%);
+      padding: 0.5rem 1rem 0.5rem 0.75rem;
+      border-radius: 50px;
+      color: var(--primary-dark);
+      font-weight: 600;
+      border: 1px solid rgba(108, 92, 231, 0.2);
+      transition: var(--transition);
+    }
+    
+    .user-info:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.1);
+    }
+    
+    .inventory-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .search-filter {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    
+    .search-box {
+      position: relative;
+    }
+    
+    .search-box i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+      z-index: 1;
+    }
+    
+    .search-box input {
+      padding: 0.5rem 1rem 0.5rem 2.5rem;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: var(--border-radius-sm);
+      width: 250px;
+      background: rgba(255,255,255,0.8);
+      transition: var(--transition);
+      position: relative;
+      z-index: 0;
+    }
+    
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+      background: white;
+    }
+    
+    .filter-select {
+      padding: 0.5rem;
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: var(--border-radius-sm);
+      background: rgba(255,255,255,0.8);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+      background: white;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: var(--border-radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 500;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: var(--transition);
+    }
+    
+    .btn:hover::before {
+      left: 100%;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, #1a7fd8 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(108, 92, 231, 0.3);
+    }
+    
+    .btn-outline {
+      background: white;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .btn-outline:hover {
+      background: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.1);
+    }
+    
+    .inventory-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.98) 100%);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .inventory-table th, 
+    .inventory-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .inventory-table th {
+      background: rgba(255,255,255,0.6);
+      font-weight: 600;
+      color: var(--dark);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(10px);
+    }
+    
+    .inventory-table tr:hover {
+      background: rgba(108, 92, 231, 0.03);
+    }
+    
+    .stock-level {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .stock-critical {
+      background: linear-gradient(135deg, var(--danger-light) 0%, rgba(255, 71, 87, 0.05) 100%);
+      color: var(--danger);
+      border-left: 3px solid var(--danger);
+    }
+    
+    .stock-low {
+      background: linear-gradient(135deg, var(--warning-light) 0%, rgba(255, 165, 2, 0.05) 100%);
+      color: var(--warning);
+      border-left: 3px solid var(--warning);
+    }
+    
+    .stock-normal {
+      background: linear-gradient(135deg, var(--success-light) 0%, rgba(46, 213, 115, 0.05) 100%);
+      color: var(--success);
+      border-left: 3px solid var(--success);
+    }
+    
+    .action-cell {
+      display: flex;
+      gap: 0.5rem;
+      text-align: center;
+
+    }
+    
+     .delete-btn {
+      color: white;
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    
+  
+    
+    .delete-btn {
+      background: linear-gradient(135deg, var(--danger) 0%, #ff6b81 100%);
+      box-shadow: 0 2px 8px rgba(255, 71, 87, 0.2);
+    }
+    
+    .delete-btn:hover {
+      transform: translateY(-2px) scale(1.1);
+      box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+    }
+    
+    .barcode-scanner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      display: none;
+      backdrop-filter: blur(5px);
+    }
+    
+    .scanner-container {
+      background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.98) 100%);
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      width: 80%;
+      max-width: 500px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .scanner-video {
+      width: 100%;
+      background: #000;
+      margin-bottom: 1rem;
+      border-radius: var(--border-radius-sm);
+      overflow: hidden;
+    }
+    
+    .scanner-result {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(255,255,255,0.8);
+      border-radius: var(--border-radius-sm);
+      display: none;
+      border-left: 3px solid var(--primary);
+    }
+    
+    .btn-icon {
+      padding: 0.5rem 0.75rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 0 0.25rem;
+      transition: var(--transition);
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .btn-edit {
+      background: var(--info-light);
+      color: var(--info);
+    }
+    
+    .btn-edit:hover {
+      background: var(--info);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(30, 144, 255, 0.3);
+    }
+    
+    .btn-delete {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+    
+    .btn-delete:hover {
+      background: var(--danger);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
+    }
+    
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 2rem;
+      gap: 0.5rem;
+    }
+    
+    .page-btn {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid rgba(0,0,0,0.1);
+      background: white;
+      cursor: pointer;
+      border-radius: var(--border-radius-sm);
+      transition: var(--transition);
+    }
+    
+    .page-btn.active {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 2px 8px rgba(108, 92, 231, 0.2);
+    }
+    
+    .page-btn:hover:not(.active) {
+      background: rgba(108, 92, 231, 0.05);
+      transform: translateY(-2px);
+    }
+    
+   
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .inventory-table {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .sidebar-header {
+      animation: float 4s ease-in-out infinite;
+    }
+    
+    @media (max-width: 992px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <img src="https://cdn-icons-png.flaticon.com/512/3952/3952026.png" alt="Pharmacy Icon">
+      <h2>PharmaCare</h2>
+    </div>
+    <div class="sidebar-menu">
+      <div class="menu-item" onclick="window.location.href='dashboard.html'">
+        <i class="fas fa-chart-bar"></i> Dashboard
+      </div>
+      <div class="menu-item" onclick="window.location.href='ProfilePage.html'">
+        <i class="fas fa-box-open"></i> Pharmacy Profile
+      </div>
+      <div class="menu-item active">
+        <i class="fas fa-pills"></i> Inventory
+      </div>
+      <div class="menu-item" onclick="window.location.href='SpecialOffers.html'">
+        <i class="fas fa-credit-card"></i> Pharmacy Offers
+      </div>
+      <div class="menu-item" onclick="window.location.href='orders.html'">
+        <i class="fas fa-box-open"></i> Orders
+      </div>
+      <div class="menu-item" onclick="window.location.href='payments.html'">
+        <i class="fas fa-credit-card"></i> Payments
+      </div>
+     
+      <div class="menu-item" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="header">
+      <div class="page-title">
+        <i class="fas fa-pills"></i>
+        <h1>Inventory Management</h1>
+      </div>
+      <div class="user-info">
+        Welcome, <span id="pharmacy-name">Loading...</span>
+      </div>
+    </div>
+
+    <div class="inventory-controls">
+      <div class="search-filter">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search medicines..." id="search-input">
+        </div>
+        <select class="filter-select" id="stock-filter">
+          <option value="all">All Stock</option>
+          <option value="critical">Critical Only</option>
+          <option value="low">Low Stock</option>
+          <option value="normal">Normal Stock</option>
+        </select>
+        <select class="filter-select" id="sort-by">
+          <option value="name">Sort by Name</option>
+          <option value="stock">Sort by Stock Level</option>
+          <option value="expiry">Sort by Expiry Date</option>
+        </select>
+      </div>
+      <div id="admin-actions" style="display: none;">
+        <button class="btn btn-primary" onclick="window.openAddInventoryModal()" style="display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fas fa-plus"></i> Add Inventory
+        </button>
+      </div>
+    </div>
+
+    <table class="inventory-table">
+      <thead>
+        <tr>
+          <th>Medicine ID</th>
+          <th>Medicine Name</th>
+          <th>Category</th>
+          <th>Current Stock</th>
+          <th>Expiry Date</th>
+          <th>Status</th>
+          <th>Price</th>
+          <th id="actions-header" style="display: none;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="inventory-table-body">
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <button class="page-btn" onclick="changePage(-1)"><i class="fas fa-chevron-left"></i></button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <button class="page-btn" onclick="changePage(1)"><i class="fas fa-chevron-right"></i></button>
+    </div>
+  </div>
+
+  <div class="barcode-scanner" id="barcode-scanner">
+    <div class="scanner-container">
+      <h2>Scan Barcode</h2>
+      <video class="scanner-video" id="scanner-video"></video>
+      <button class="btn btn-primary" onclick="startScan()">
+        <i class="fas fa-play"></i> Start Scan
+      </button>
+      <button class="btn btn-outline" onclick="closeScanner()">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+      <div class="scanner-result" id="scanner-result">
+        Scanned: <span id="scanned-code"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="add-medicine-modal" style="display: none;">
+  </div>
+
+  <script src="./assets/js/api.js"></script>
+  <script>
+    // Check authentication
+    const pharmacy = JSON.parse(localStorage.getItem('pharmacy') || 'null');
+    const token = localStorage.getItem('token');
+    
+    if (!pharmacy || !token) {
+      window.location.href = 'index.html';
+    } else {
+      const pharmacyNameEl = document.getElementById('pharmacy-name');
+      if (pharmacyNameEl) {
+        pharmacyNameEl.textContent = pharmacy.username || pharmacy.fullName || pharmacy.Username || 'User';
+      }
+    }
+
+    let allInventory = [];
+    let filteredInventory = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let isAdmin = false;
+    let userRole = '';
+    let medicinesList = [];
+    let suppliersList = [];
+
+    async function loadUserRole() {
+      try {
+        const profile = await profileAPI.get();
+        if (profile && profile.user) {
+          userRole = profile.user.Role || '';
+          isAdmin = userRole === 'admin';
+          
+          // Redirect non-admin users to dashboard
+          if (!isAdmin) {
+            alert('Access denied. This page is only available for administrators.');
+            window.location.href = 'dashboard.html';
+            return;
+          }
+          
+          // Show/hide admin controls
+          const adminActions = document.getElementById('admin-actions');
+          const actionsHeader = document.getElementById('actions-header');
+          
+          if (isAdmin) {
+            if (adminActions) adminActions.style.display = 'block';
+            if (actionsHeader) actionsHeader.style.display = 'table-cell';
+          } else {
+            if (adminActions) adminActions.style.display = 'none';
+            if (actionsHeader) actionsHeader.style.display = 'none';
+          }
+        }
+      } catch (error) {
+        isAdmin = false;
+        // If error loading role, redirect to dashboard for safety
+        alert('Error verifying access. Redirecting to dashboard.');
+        window.location.href = 'dashboard.html';
+      }
+    }
+
+    async function loadInventory() {
+      const tableBody = document.getElementById('inventory-table-body');
+      if (!tableBody) {
+        return;
+      }
+      
+      const colspan = isAdmin ? 8 : 7;
+      tableBody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; padding: 2rem; color: var(--gray);">Loading inventory...</td></tr>`;
+      
+      try {
+        // Wait a bit for API to be available
+        if (typeof inventoryAPI === 'undefined') {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        if (typeof inventoryAPI === 'undefined' || !inventoryAPI.getAll) {
+          throw new Error('API not available');
+        }
+        
+        // Load medicines and suppliers for dropdowns (only if admin)
+        if (isAdmin && medicinesList.length === 0) {
+          try {
+            [medicinesList, suppliersList] = await Promise.all([
+              medicinesAPI.getAll().catch(() => []),
+              suppliersAPI.getAll().catch(() => [])
+            ]);
+          } catch (err) {
+          }
+        }
+        
+        const response = await inventoryAPI.getAll();
+        
+        // Handle both array and object responses
+        if (Array.isArray(response)) {
+          allInventory = response;
+        } else if (response.data && Array.isArray(response.data)) {
+          allInventory = response.data;
+        } else if (response.recordset && Array.isArray(response.recordset)) {
+          allInventory = response.recordset;
+        } else {
+          allInventory = [];
+        }
+        
+        filteredInventory = [...allInventory];
+        renderInventory();
+      } catch (error) {
+        tableBody.innerHTML = 
+          '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--danger);">Error loading inventory: ' + 
+          (error.message || 'Please check your connection and try again') + '</td></tr>';
+      }
+    }
+
+    function renderInventory(inventory = filteredInventory) {
+      const tableBody = document.getElementById('inventory-table-body');
+      if (!tableBody) {
+        return;
+      }
+      
+      tableBody.innerHTML = '';
+
+      if (!inventory || inventory.length === 0) {
+        const colspan = isAdmin ? 8 : 7;
+        tableBody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; padding: 2rem;">No inventory items found</td></tr>`;
+        updatePagination(0);
+        return;
+      }
+      
+      // Calculate pagination
+      const totalPages = Math.ceil(inventory.length / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const pageItems = inventory.slice(startIndex, endIndex);
+      
+      // Reset to page 1 if current page is out of bounds
+      if (currentPage > totalPages && totalPages > 0) {
+        currentPage = 1;
+        return renderInventory(inventory);
+      }
+      
+      pageItems.forEach(item => {
+        // Handle different field name variations
+        const medicineId = item.MedicineID || item.medicineId || item.ID || item.id || 'N/A';
+        const medicineName = item.MedicineName || item.medicineName || item.Name || item.name || 'Unknown Medicine';
+        const category = item.Category || item.category || 'General';
+        const currentStock = item.CurrentStock || item.currentStock || item.TotalQuantity || item.totalQuantity || 0;
+        const expiryDate = item.ExpiryDate || item.expiryDate || item.Expiry_Date;
+        const status = item.Status || item.status || 'normal';
+        const price = item.Price != null && item.Price !== '' ? parseFloat(item.Price) : null;
+        
+        // Format expiry date
+        const formattedDate = expiryDate ? new Date(expiryDate).toLocaleDateString() : 'N/A';
+        
+        // Determine status class and text
+        let statusClass, statusText;
+        const statusLower = status.toLowerCase();
+        
+        if (statusLower === 'out-of-stock') {
+          statusClass = 'stock-critical';
+          statusText = 'Out of Stock';
+        } else if (statusLower === 'critical') {
+          statusClass = 'stock-critical';
+          statusText = 'Critical';
+        } else if (statusLower === 'low') {
+          statusClass = 'stock-low';
+          statusText = 'Low';
+        } else {
+          statusClass = 'stock-normal';
+          statusText = 'Normal';
+        }
+
+        const row = document.createElement('tr');
+        
+        // Create cells
+        const idCell = document.createElement('td');
+        idCell.textContent = medicineId;
+        row.appendChild(idCell);
+        
+        const nameCell = document.createElement('td');
+        const nameStrong = document.createElement('strong');
+        nameStrong.textContent = medicineName;
+        nameCell.appendChild(nameStrong);
+        row.appendChild(nameCell);
+        
+        const categoryCell = document.createElement('td');
+        categoryCell.textContent = category;
+        row.appendChild(categoryCell);
+        
+        const stockCell = document.createElement('td');
+        stockCell.textContent = `${currentStock} units`;
+        row.appendChild(stockCell);
+        
+        const dateCell = document.createElement('td');
+        dateCell.textContent = formattedDate;
+        row.appendChild(dateCell);
+        
+        const statusCell = document.createElement('td');
+        const statusSpan = document.createElement('span');
+        statusSpan.className = `stock-level ${statusClass}`;
+        statusSpan.textContent = statusText;
+        statusCell.appendChild(statusSpan);
+        row.appendChild(statusCell);
+        
+        const priceCell = document.createElement('td');
+        priceCell.textContent = price != null && !isNaN(price) ? `$${Number(price).toFixed(2)}` : 'N/A';
+        row.appendChild(priceCell);
+        
+        // Add action buttons if admin
+        if (isAdmin) {
+          const actionsCell = document.createElement('td');
+          
+          const editBtn = document.createElement('button');
+          editBtn.className = 'btn-icon btn-edit';
+          editBtn.title = 'Edit';
+          editBtn.setAttribute('data-medicine-id', medicineId);
+          editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+          editBtn.addEventListener('click', () => window.openEditInventoryModal(medicineId));
+          actionsCell.appendChild(editBtn);
+          
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'btn-icon btn-delete';
+          deleteBtn.title = 'Delete';
+          deleteBtn.setAttribute('data-medicine-id', medicineId);
+          deleteBtn.setAttribute('data-medicine-name', medicineName);
+          deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+          deleteBtn.addEventListener('click', () => window.deleteInventoryItem(medicineId, medicineName));
+          actionsCell.appendChild(deleteBtn);
+          
+          row.appendChild(actionsCell);
+        }
+        
+        tableBody.appendChild(row);
+      });
+      
+      // Update pagination
+      updatePagination(inventory.length);
+    }
+    
+    function updatePagination(totalItems) {
+      const paginationDiv = document.querySelector('.pagination');
+      if (!paginationDiv) return;
+      
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+      
+      // Hide pagination if items don't exceed one page
+      if (totalItems <= itemsPerPage) {
+        paginationDiv.style.display = 'none';
+        return;
+      }
+      
+      // Show pagination
+      paginationDiv.style.display = 'flex';
+      
+      // Clear existing buttons
+      paginationDiv.innerHTML = '';
+      
+      // Previous button
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'page-btn';
+      prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.onclick = () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderInventory();
+        }
+      };
+      paginationDiv.appendChild(prevBtn);
+      
+      // Page number buttons
+      for (let i = 1; i <= totalPages; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = 'page-btn' + (i === currentPage ? ' active' : '');
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => {
+          currentPage = i;
+          renderInventory();
+        };
+        paginationDiv.appendChild(pageBtn);
+      }
+      
+      // Next button
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'page-btn';
+      nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderInventory();
+        }
+      };
+      paginationDiv.appendChild(nextBtn);
+    }
+
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        filteredInventory = allInventory.filter(item => {
+          const name = (item.MedicineName || item.medicineName || item.Name || item.name || '').toLowerCase();
+          const id = String(item.MedicineID || item.medicineId || item.ID || item.id || '');
+          const category = (item.Category || item.category || '').toLowerCase();
+          
+          return name.includes(searchTerm) || 
+                 id.includes(searchTerm) ||
+                 category.includes(searchTerm);
+        });
+        currentPage = 1; // Reset to first page on filter
+        renderInventory();
+      });
+    }
+
+    const stockFilter = document.getElementById('stock-filter');
+    if (stockFilter) {
+      stockFilter.addEventListener('change', (e) => {
+        const filter = e.target.value;
+        
+        if (filter === 'all') {
+          filteredInventory = [...allInventory];
+        } else if (filter === 'critical') {
+          filteredInventory = allInventory.filter(item => {
+            const status = (item.Status || item.status || 'normal').toLowerCase();
+            return status === 'critical' || status === 'out-of-stock';
+          });
+        } else if (filter === 'low') {
+          filteredInventory = allInventory.filter(item => {
+            const status = (item.Status || item.status || 'normal').toLowerCase();
+            return status === 'low';
+          });
+        } else if (filter === 'normal') {
+          filteredInventory = allInventory.filter(item => {
+            const status = (item.Status || item.status || 'normal').toLowerCase();
+            return status === 'normal';
+          });
+        }
+        
+        currentPage = 1; // Reset to first page on filter
+        renderInventory();
+      });
+    }
+
+    const sortBy = document.getElementById('sort-by');
+    if (sortBy) {
+      sortBy.addEventListener('change', (e) => {
+        const sortValue = e.target.value;
+        
+        // Create a copy of filtered inventory to sort
+        const sortedInventory = [...filteredInventory];
+        
+        sortedInventory.sort((a, b) => {
+          if (sortValue === 'name') {
+            const nameA = (a.MedicineName || a.medicineName || a.Name || '').toLowerCase();
+            const nameB = (b.MedicineName || b.medicineName || b.Name || '').toLowerCase();
+            return nameA.localeCompare(nameB);
+          } else if (sortValue === 'stock') {
+            const stockA = parseInt(a.CurrentStock || a.currentStock || a.TotalQuantity || 0);
+            const stockB = parseInt(b.CurrentStock || b.currentStock || b.TotalQuantity || 0);
+            return stockB - stockA; // Descending order
+          } else if (sortValue === 'expiry') {
+            const dateA = a.ExpiryDate || a.expiryDate ? new Date(a.ExpiryDate || a.expiryDate) : new Date('9999-12-31');
+            const dateB = b.ExpiryDate || b.expiryDate ? new Date(b.ExpiryDate || b.expiryDate) : new Date('9999-12-31');
+            return dateA - dateB; // Ascending order (earliest first)
+          }
+          return 0;
+        });
+        
+        filteredInventory = sortedInventory;
+        currentPage = 1; // Reset to first page on sort
+        renderInventory();
+      });
+    }
+
+    function logout() {
+      if (typeof authAPI !== 'undefined') {
+        authAPI.logout();
+      } else {
+        localStorage.removeItem('pharmacy');
+        localStorage.removeItem('token');
+        localStorage.removeItem('isAuthenticated');
+      }
+      window.location.href = 'index.html';
+    }
+
+    // Load inventory on page load
+    // Removed duplicate - using DOMContentLoaded at the end instead
+
+    function openBarcodeScanner() {
+      document.getElementById('barcode-scanner').style.display = 'flex';
+    }
+
+    function closeScanner() {
+      document.getElementById('barcode-scanner').style.display = 'none';
+      document.getElementById('scanner-result').style.display = 'none';
+      const video = document.getElementById('scanner-video');
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+      }
+    }
+
+    function startScan() {
+      document.getElementById('scanner-result').style.display = 'none';
+      
+      setTimeout(() => {
+        const mockBarcodes = ['MED001', 'MED005', 'MED008'];
+        const randomBarcode = mockBarcodes[Math.floor(Math.random() * mockBarcodes.length)];
+        
+        document.getElementById('scanned-code').textContent = randomBarcode;
+        document.getElementById('scanner-result').style.display = 'block';
+        
+        const rows = document.querySelectorAll('#inventory-table-body tr');
+        rows.forEach(row => {
+          row.style.backgroundColor = '';
+          if (row.cells[0].textContent === randomBarcode) {
+            row.style.backgroundColor = 'rgba(255, 253, 231, 0.5)';
+            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        });
+      }, 2000);
+    }
+
+    function editMedicine(id) {
+      const medicine = mockMedicines.find(med => med.id === id);
+      alert(`Edit medicine: ${medicine.name}\nThis would open an edit form in a real app.`);
+    }
+
+    function deleteMedicine(id) {
+      if (confirm('Are you sure you want to delete this medicine?')) {
+        alert(`Medicine ${id} would be deleted in a real app.`);
+      }
+    }
+
+    function showAddMedicineModal() {
+      alert('This would open a modal form to add new medicine in a real app.');
+    }
+
+    // changePage function is now handled by updatePagination
+    
+    // Admin functions for inventory management
+    // Make functions globally accessible
+    window.openAddInventoryModal = function() {
+      const modal = document.createElement('div');
+      modal.id = 'add-inventory-modal';
+      modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;';
+      
+      const form = document.createElement('div');
+      form.style.cssText = 'background: white; padding: 2rem; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;';
+      form.innerHTML = `
+        <h2 style="margin-bottom: 1.5rem;">Add Inventory Item</h2>
+        <form id="add-inventory-form">
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Medicine Name <span style="color: red;">*</span></label>
+            <input type="text" id="add-medicine-name" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Category</label>
+            <input type="text" id="add-category" placeholder="e.g., Oncology, General" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+            <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Leave empty for "General"</small>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Current Stock <span style="color: red;">*</span></label>
+            <input type="number" id="add-current-stock" min="0" step="1" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+            <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Status: 1-20=Critical, 21-40=Low, 41+=Normal</small>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Price</label>
+            <input type="number" id="add-price" min="0" step="0.01" placeholder="0.00" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+            <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Unit price (optional)</small>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Expiry Date</label>
+            <input type="date" id="add-expiry-date" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+            <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Optional - Leave empty if not applicable</small>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Supplier</label>
+            <select id="add-supplier-id" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+              <option value="">Select Supplier (Optional)</option>
+            </select>
+            <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Optional - Link inventory to a supplier</small>
+          </div>
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="button" onclick="window.closeInventoryModal()" style="padding: 0.75rem 1.5rem; background: #f5f5f5; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">Cancel</button>
+            <button type="submit" style="padding: 0.75rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">Add Item</button>
+          </div>
+        </form>
+      `;
+      
+      modal.appendChild(form);
+      document.body.appendChild(modal);
+      
+      // Populate supplier dropdown
+      const supplierSelect = form.querySelector('#add-supplier-id');
+      suppliersList.forEach(supplier => {
+        const option = document.createElement('option');
+        option.value = supplier.SupplierID;
+        option.textContent = supplier.Name;
+        supplierSelect.appendChild(option);
+      });
+      
+      // Handle form submission
+      form.querySelector('#add-inventory-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await addInventoryItem();
+      });
+      
+      // Close on backdrop click
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          window.closeInventoryModal();
+        }
+      });
+    }
+    
+    window.openEditInventoryModal = function(medicineId) {
+      const item = allInventory.find(i => (i.MedicineID || i.ID) == medicineId);
+      if (!item) {
+        alert('Inventory item not found');
+        return;
+      }
+      
+      const modal = document.createElement('div');
+      modal.id = 'edit-inventory-modal';
+      modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;';
+      
+      const form = document.createElement('div');
+      form.style.cssText = 'background: white; padding: 2rem; border-radius: 12px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;';
+      
+      const expiryDate = item.ExpiryDate ? new Date(item.ExpiryDate).toISOString().split('T')[0] : '';
+      const rawPrice = item.Price;
+      const hasPrice = rawPrice !== undefined && rawPrice !== null && rawPrice !== '';
+      const editPriceDisplay = hasPrice ? (typeof rawPrice === 'number' ? rawPrice : parseFloat(String(rawPrice))) : '';
+      const editPriceValue = (editPriceDisplay !== '' && !isNaN(editPriceDisplay)) ? editPriceDisplay : '';
+      
+      form.innerHTML = `
+        <h2 style="margin-bottom: 1.5rem;">Edit Inventory Item</h2>
+        <form id="edit-inventory-form">
+          <input type="hidden" id="edit-medicine-id" value="${item.MedicineID || item.ID}">
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Medicine Name <span style="color: red;">*</span></label>
+            <input type="text" id="edit-medicine-name" value="${(item.MedicineName || item.Name || '').replace(/"/g, '&quot;')}" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+            <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Name of the medicine</small>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Category</label>
+            <input type="text" id="edit-category" value="${(item.Category || '').replace(/"/g, '&quot;')}" placeholder="e.g., Oncology, General" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+            <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Leave empty for "General"</small>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Current Stock <span style="color: red;">*</span></label>
+            <input type="number" id="edit-current-stock" value="${item.CurrentStock || item.TotalQuantity || 0}" min="0" step="1" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+            <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Status: 1-20=Critical, 21-40=Low, 41+=Normal</small>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Price</label>
+            <input type="number" id="edit-price" min="0" step="0.01" value="${editPriceDisplay}" placeholder="0.00" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+            <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Unit price (optional)</small>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Expiry Date</label>
+            <input type="date" id="edit-expiry-date" value="${expiryDate}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+            <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Optional - Leave empty if not applicable</small>
+          </div>
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Supplier</label>
+            <select id="edit-supplier-id" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem;">
+              <option value="">Select Supplier (Optional)</option>
+            </select>
+            <small style="color: #666; font-size: 0.85rem; margin-top: 0.25rem; display: block;">Optional - Link inventory to a supplier</small>
+          </div>
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="button" onclick="window.closeInventoryModal()" style="padding: 0.75rem 1.5rem; background: #f5f5f5; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">Cancel</button>
+            <button type="submit" style="padding: 0.75rem 1.5rem; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem;">Update Item</button>
+          </div>
+        </form>
+      `;
+      
+      modal.appendChild(form);
+      document.body.appendChild(modal);
+      
+      // Populate supplier dropdown
+      const supplierSelect = form.querySelector('#edit-supplier-id');
+      suppliersList.forEach(supplier => {
+        const option = document.createElement('option');
+        option.value = supplier.SupplierID;
+        option.textContent = supplier.Name;
+        if (item.SupplierID == supplier.SupplierID) {
+          option.selected = true;
+        }
+        supplierSelect.appendChild(option);
+      });
+      
+      // Handle form submission
+      form.querySelector('#edit-inventory-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await updateInventoryItem(medicineId);
+      });
+      
+      // Close on backdrop click
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          window.closeInventoryModal();
+        }
+      });
+    }
+    
+    async function addInventoryItem() {
+      try {
+        const medicineName = document.getElementById('add-medicine-name').value.trim();
+        const category = document.getElementById('add-category').value.trim();
+        const currentStock = parseInt(document.getElementById('add-current-stock').value);
+        const priceEl = document.getElementById('add-price');
+        const price = priceEl && priceEl.value !== '' && !isNaN(parseFloat(priceEl.value)) ? parseFloat(priceEl.value) : null;
+        const expiryDate = document.getElementById('add-expiry-date').value;
+        const supplierId = document.getElementById('add-supplier-id').value;
+        
+        if (!medicineName) {
+          alert('Please fill in Medicine Name (required field).');
+          return;
+        }
+        
+        if (isNaN(currentStock) || currentStock < 0) {
+          alert('Current Stock must be a valid number (0 or greater).');
+          return;
+        }
+        
+        const inventoryData = {
+          MedicineName: medicineName,
+          Category: category || 'General',
+          CurrentStock: currentStock,
+          Price: price,
+          ExpiryDate: expiryDate || null,
+          SupplierID: supplierId || null
+        };
+        
+        await inventoryAPI.create(inventoryData);
+        alert('Inventory item added successfully!');
+        window.closeInventoryModal();
+        await loadInventory();
+      } catch (error) {
+        console.error('Error adding inventory:', error);
+        alert('Error adding inventory: ' + (error.message || 'Please try again'));
+      }
+    }
+    
+    async function updateInventoryItem(medicineId) {
+      try {
+        const medicineName = document.getElementById('edit-medicine-name').value.trim();
+        const category = document.getElementById('edit-category').value.trim();
+        const currentStock = parseInt(document.getElementById('edit-current-stock').value);
+        const priceEl = document.getElementById('edit-price');
+        const price = priceEl && priceEl.value !== '' && !isNaN(parseFloat(priceEl.value)) ? parseFloat(priceEl.value) : null;
+        const expiryDate = document.getElementById('edit-expiry-date').value;
+        const supplierId = document.getElementById('edit-supplier-id').value;
+        
+        if (!medicineName) {
+          alert('Medicine Name is required');
+          return;
+        }
+        
+        if (isNaN(currentStock) || currentStock < 0) {
+          alert('Current Stock must be a valid number (0 or greater).');
+          return;
+        }
+        
+        const inventoryData = {
+          MedicineName: medicineName,
+          Category: category || 'General',
+          CurrentStock: currentStock,
+          Price: price,
+          ExpiryDate: expiryDate || null,
+          SupplierID: supplierId || null
+        };
+        
+        await inventoryAPI.update(medicineId, inventoryData);
+        alert('Inventory item updated successfully!');
+        window.closeInventoryModal();
+        await loadInventory();
+      } catch (error) {
+        alert('Error updating inventory: ' + (error.message || 'Please try again'));
+      }
+    }
+    
+    // Make deleteInventoryItem globally accessible
+    window.deleteInventoryItem = async function(medicineId, medicineName) {
+      if (!confirm(`Are you sure you want to delete "${medicineName}" from inventory? This action cannot be undone.`)) {
+        return;
+      }
+      
+      try {
+        await inventoryAPI.delete(medicineId);
+        alert('Inventory item deleted successfully!');
+        await loadInventory();
+      } catch (error) {
+        alert('Error deleting inventory: ' + (error.message || 'Please try again'));
+      }
+    };
+    
+    window.closeInventoryModal = function() {
+      const modal = document.getElementById('add-inventory-modal') || document.getElementById('edit-inventory-modal');
+      if (modal) {
+        modal.remove();
+      }
+    }
+    
+    // Load user role on page load
+    document.addEventListener('DOMContentLoaded', async function() {
+      await loadUserRole();
+      await loadInventory();
+    });
+  </script>
+</body>
+</html>
