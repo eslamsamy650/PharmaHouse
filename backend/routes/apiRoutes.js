@@ -56,7 +56,7 @@ router.get('/medicines', authenticateToken, async (req, res) => {
       `;
     }
 
-    const request = new sql.Request(transaction);
+    const request = pool.request();
     if (supplierId) {
       request.input('supplierId', sql.Int, parseInt(supplierId));
     }
@@ -73,7 +73,7 @@ router.get('/medicines', authenticateToken, async (req, res) => {
 router.get('/medicines/:id', authenticateToken, async (req, res) => {
   try {
     const pool = await getPool();
-    const result = await new sql.Request(transaction)
+    const result = await pool.request()
       .input('id', sql.Int, req.params.id)
       .query(`
         SELECT 
@@ -107,7 +107,7 @@ router.post('/medicines', authenticateToken, async (req, res) => {
     }
 
     const pool = await getPool();
-    await new sql.Request(transaction)
+    await pool.request()
       .input('ID', sql.Int, ID)
       .input('Name', sql.VarChar, Name)
       .input('Description', sql.Text, Description || null)
@@ -128,29 +128,39 @@ router.post('/medicines', authenticateToken, async (req, res) => {
 router.delete('/medicines/:id', authenticateToken, async (req, res) => {
   try {
 
-     const medicineId = parseInt(req.params.id);
-     const PharmacyID = req.user.PharmacyID;
+    const medicineId = parseInt(req.params.id);
     if (isNaN(medicineId) || medicineId <= 0) {
-   return res.status(400).json({
-    error: 'Invalid medicine ID'
-   });
-      }  
+      return res.status(400).json({ error: 'Invalid medicine ID' });
+    }
+
     const pool = await getPool();
 
-      const medicineCheck = await pool.request()
-  .input('MedicineID', sql.Int, medicineId)
-  .query(`
-      SELECT ID
-      FROM Medicines
-      WHERE ID = @MedicineID
-  `);
-   if (medicineCheck.recordset.length === 0) {
-  return res.status(404).json({
-    error: 'Medicine not found'
-  });
-  }
+    // 1. Find the user's PharmacyID using their email
+    const pharmacyLookup = await pool.request()
+      .input('email', sql.VarChar, req.user.email)
+      .query('SELECT ID FROM Pharmacies WHERE Email = @email');
 
-    await new sql.Request(transaction)
+    if (pharmacyLookup.recordset.length === 0) {
+      return res.status(403).json({ error: 'No pharmacy associated with this user' });
+    }
+    const userPharmacyID = pharmacyLookup.recordset[0].ID;
+
+    // 2. Check if the medicine belongs to that PharmacyID
+    const medicineCheck = await pool.request()
+      .input('MedicineID', sql.Int, medicineId)
+      .input('PharmacyID', sql.Int, userPharmacyID)
+      .query(`
+          SELECT ID
+          FROM Medicines
+          WHERE ID = @MedicineID
+          AND PharmacyID = @PharmacyID
+      `);
+
+    if (medicineCheck.recordset.length === 0) {
+      return res.status(404).json({ error: 'Medicine not found or access denied' });
+    }
+
+    await pool.request()
       .input('MedicineID', sql.Int, medicineId)
       .execute('DeleteMedicine');
 
@@ -172,7 +182,7 @@ router.get('/inventory/test', (req, res) => {
 router.get('/inventory', authenticateToken, async (req, res) => {
   try {
     const pool = await getPool();
-    const result = await new sql.Request(transaction).query(`
+    const result = await pool.request().query(`
       SELECT 
         i.MedicineID,
         i.MedicineName,
@@ -202,7 +212,7 @@ router.post('/inventory', authenticateToken, async (req, res) => {
   try {
     // Check if user is admin
     const pool = await getPool();
-    const userResult = await new sql.Request(transaction)
+    const userResult = await pool.request()
       .input('userId', sql.Int, req.user.UserID)
       .query('SELECT Role FROM Users WHERE UserID = @userId');
 
@@ -220,13 +230,13 @@ router.post('/inventory', authenticateToken, async (req, res) => {
     let finalMedicineID = MedicineID;
     if (!finalMedicineID || finalMedicineID === null || finalMedicineID === undefined || finalMedicineID === '') {
       // Get the maximum MedicineID from Inventory table
-      const maxIdResult = await new sql.Request(transaction)
+      const maxIdResult = await pool.request()
         .query('SELECT ISNULL(MAX(MedicineID), 0) AS MaxID FROM Inventory');
       
       const maxId = maxIdResult.recordset[0].MaxID || 0;
       
       // Also check Medicines table to ensure we don't conflict
-      const maxMedicineIdResult = await new sql.Request(transaction)
+      const maxMedicineIdResult = await pool.request()
         .query('SELECT ISNULL(MAX(ID), 0) AS MaxID FROM Medicines');
       
       const maxMedicineId = maxMedicineIdResult.recordset[0].MaxID || 0;
@@ -251,14 +261,14 @@ router.post('/inventory', authenticateToken, async (req, res) => {
     }
 
     // Check if MedicineID exists in Medicines table, if not create it
-    const medicineCheck = await new sql.Request(transaction)
+    const medicineCheck = await pool.request()
       .input('MedicineID', sql.Int, finalMedicineID)
       .query('SELECT ID FROM Medicines WHERE ID = @MedicineID');
     
     if (medicineCheck.recordset.length === 0) {
       // Medicine doesn't exist, create it with default values
       // We need at least CompanyID - use a default company (ID 1) or get the first available
-      const companyCheck = await new sql.Request(transaction)
+      const companyCheck = await pool.request()
         .query('SELECT TOP 1 CompanyID FROM Companies ORDER BY CompanyID');
       
       const defaultCompanyID = companyCheck.recordset.length > 0 
@@ -266,7 +276,7 @@ router.post('/inventory', authenticateToken, async (req, res) => {
         : 1;
       
       const medicinePrice = Price != null && Price !== '' && !isNaN(parseFloat(Price)) ? parseFloat(Price) : 0.00;
-      await new sql.Request(transaction)
+      await pool.request()
         .input('ID', sql.Int, finalMedicineID)
         .input('Name', sql.VarChar(100), MedicineName)
         .input('Description', sql.Text, `Inventory item: ${MedicineName}`)
@@ -278,7 +288,7 @@ router.post('/inventory', authenticateToken, async (req, res) => {
         `);
     }
 
-    await new sql.Request(transaction)
+    await pool.request()
       .input('MedicineID', sql.Int, finalMedicineID)
       .input('MedicineName', sql.VarChar(100), MedicineName)
       .input('Category', sql.VarChar(50), Category || 'General')
@@ -320,7 +330,7 @@ router.put('/inventory/:id', authenticateToken, async (req, res) => {
   try {
     // Check if user is admin
     const pool = await getPool();
-    const userResult = await new sql.Request(transaction)
+    const userResult = await pool.request()
       .input('userId', sql.Int, req.user.UserID)
       .query('SELECT Role FROM Users WHERE UserID = @userId');
 
@@ -346,7 +356,7 @@ router.put('/inventory/:id', authenticateToken, async (req, res) => {
       status = 'out-of-stock';
     }
 
-    await new sql.Request(transaction)
+    await pool.request()
       .input('MedicineID', sql.Int, medicineId)
       .input('MedicineName', sql.VarChar(100), MedicineName)
       .input('Category', sql.VarChar(50), Category)
@@ -369,7 +379,7 @@ router.put('/inventory/:id', authenticateToken, async (req, res) => {
 
     const medicinePrice = Price != null && Price !== '' && !isNaN(parseFloat(Price)) ? parseFloat(Price) : null;
     if (medicinePrice !== null) {
-      await new sql.Request(transaction)
+      await pool.request()
         .input('medicineId', sql.Int, medicineId)
         .input('Price', sql.Decimal(10, 2), medicinePrice)
         .query(`UPDATE Medicines SET Price = @Price WHERE ID = @medicineId`);
@@ -387,7 +397,7 @@ router.delete('/inventory/:id', authenticateToken, async (req, res) => {
   try {
     // Check if user is admin
     const pool = await getPool();
-    const userResult = await new sql.Request(transaction)
+    const userResult = await pool.request()
       .input('userId', sql.Int, req.user.UserID)
       .query('SELECT Role FROM Users WHERE UserID = @userId');
 
@@ -397,7 +407,7 @@ router.delete('/inventory/:id', authenticateToken, async (req, res) => {
 
     const medicineId = parseInt(req.params.id);
 
-    const deleteResult = await new sql.Request(transaction)
+    const deleteResult = await pool.request()
       .input('MedicineID', sql.Int, medicineId)
       .query('DELETE FROM Inventory WHERE MedicineID = @MedicineID');
 
@@ -418,7 +428,7 @@ router.get('/dashboard/stats', authenticateToken, async (req, res) => {
     const pool = await getPool();
 
 
-     const userResult = await new sql.Request(transaction)
+     const userResult = await pool.request()
       .input('userId', sql.Int, req.user.UserID)
       .query('SELECT Role FROM Users WHERE UserID = @userId');
 
@@ -426,28 +436,28 @@ router.get('/dashboard/stats', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Access denied. Admin role required.' });
     }
     // Critical alerts (1-20 units) from Inventory
-    const criticalResult = await new sql.Request(transaction).query(`
+    const criticalResult = await pool.request().query(`
       SELECT COUNT(*) AS Count
       FROM Inventory
       WHERE Status = 'critical' OR (CurrentStock >= 1 AND CurrentStock <= 20)
     `);
 
     // Low stock (21-40 units) from Inventory
-    const lowStockResult = await new sql.Request(transaction).query(`
+    const lowStockResult = await pool.request().query(`
       SELECT COUNT(*) AS Count
       FROM Inventory
       WHERE Status = 'low' OR (CurrentStock >= 21 AND CurrentStock <= 40)
     `);
 
     // Total medicines from Inventory
-    const totalMedsResult = await new sql.Request(transaction).query(`
+    const totalMedsResult = await pool.request().query(`
       SELECT COUNT(*) AS Count
       FROM Inventory
       WHERE CurrentStock > 0 OR TotalQuantity > 0
     `);
 
     // Pending orders for current logged-in user only
-    const pendingOrdersResult = await new sql.Request(transaction)
+    const pendingOrdersResult = await pool.request()
       .input('userId', sql.Int, req.user.UserID)
       .query(`
         SELECT COUNT(*) AS Count
@@ -460,7 +470,7 @@ router.get('/dashboard/stats', authenticateToken, async (req, res) => {
       `);
 
     // Recent alerts - get critical and low stock items from Inventory
-    const alertsResult = await new sql.Request(transaction).query(`
+    const alertsResult = await pool.request().query(`
       SELECT TOP 5
         i.MedicineID AS AlertID,
         i.MedicineName,
@@ -501,7 +511,7 @@ router.get('/dashboard/stats', authenticateToken, async (req, res) => {
 router.get('/orders', authenticateToken, async (req, res) => {
   try {
     const pool = await getPool();
-    const result = await new sql.Request(transaction)
+    const result = await pool.request()
       .input('userId', sql.Int, req.user.UserID)
       .query(`
         SELECT 
@@ -527,7 +537,7 @@ router.get('/orders', authenticateToken, async (req, res) => {
     // Get order items for each order
     const orders = result.recordset;
     for (const order of orders) {
-      const itemsResult = await new sql.Request(transaction)
+      const itemsResult = await pool.request()
         .input('orderId', sql.Int, order.OrderID)
         .query(`
           SELECT 
@@ -570,7 +580,7 @@ router.post('/orders', authenticateToken, async (req, res) => {
       
 
       // Create order
-      const orderResult = await new sql.Request(transaction)
+  const orderResult = await transaction.request()
   .input('UserID', sql.Int, req.user.UserID)
   .input('PharmacyID', sql.Int, PharmacyID || null)
   .input('SupplierID', sql.Int, SupplierID || null)
@@ -603,7 +613,7 @@ router.post('/orders', authenticateToken, async (req, res) => {
         const quantity = item.Quantity || item.quantity || 1;
         const unitPrice = item.UnitPrice || item.unitPrice || 0;
 
-        await new sql.Request(transaction)
+        await transaction.request()
           .input('OrderID', sql.Int, orderId)
           .input('MedicineID', sql.Int, medicineId)
           .input('Quantity', sql.Int, quantity)
@@ -616,18 +626,15 @@ router.post('/orders', authenticateToken, async (req, res) => {
 
    
 
-      const invoiceResult = await new sql.Request(transaction)
+      await transaction.request()
         .input('OrderID', sql.Int, orderId)
         .input('InvoiceDate', sql.Date, new Date())
         .input('TotalAmount', sql.Decimal(10, 2), TotalAmount)
         .input('PaymentStatus', sql.VarChar, 'Pending')
         .query(`
           INSERT INTO Invoices (OrderID, InvoiceDate, TotalAmount, PaymentStatus)
-          OUTPUT INSERTED.InvoiceID
           VALUES (@OrderID, @InvoiceDate, @TotalAmount, @PaymentStatus)
         `);
-
-      const invoiceId = invoiceResult.recordset[0].InvoiceID;
 
       // Reduce stock from Inventory and MedicineBatches
       for (const item of items) {
@@ -635,7 +642,7 @@ router.post('/orders', authenticateToken, async (req, res) => {
         const quantity = item.Quantity || item.quantity || 1;
 
         // Update Inventory
-        await new sql.Request(transaction)
+        await transaction.request()
           .input('medicineId', sql.Int, medicineId)
           .input('quantity', sql.Int, quantity)
           .query(`
@@ -653,26 +660,47 @@ router.post('/orders', authenticateToken, async (req, res) => {
           `);
 
         // Update MedicineBatches (reduce from batches, oldest first)
-        await new sql.Request(transaction)
-          .input('medicineId', sql.Int, medicineId)
-          .input('quantity', sql.Int, quantity)
-          .query(`
-            UPDATE mb
-            SET mb.Quantity = mb.Quantity - CASE 
-              WHEN @quantity <= mb.Quantity THEN @quantity
-              ELSE mb.Quantity
-            END,
-            @quantity = @quantity - CASE 
-              WHEN @quantity <= mb.Quantity THEN @quantity
-              ELSE mb.Quantity
-            END
-            FROM (
-              SELECT TOP 1 BatchID, Quantity
-              FROM MedicineBatches
-              WHERE MedicineID = @medicineId AND Quantity > 0
-              ORDER BY ExpiryDate ASC
-            ) AS mb
-          `);
+       let remainingQuantity = quantity;
+
+  while (remainingQuantity > 0) {
+
+  // Get oldest batch with stock
+  const batchResult = await transaction.request()
+    .input('medicineId', sql.Int, medicineId)
+    .query(`
+      SELECT TOP 1 BatchID, Quantity
+      FROM MedicineBatches
+      WHERE MedicineID = @medicineId
+        AND Quantity > 0
+      ORDER BY ExpiryDate ASC
+    `);
+
+  const batch = batchResult.recordset[0];
+
+  // No batch found
+  if (!batch) {
+    throw new Error('Not enough batch stock available');
+  }
+
+  // Amount to deduct from this batch
+  const amountToDeduct = Math.min(
+    remainingQuantity,
+    batch.Quantity
+  );
+
+  // Update batch
+  await transaction.request()
+    .input('batchId', sql.Int, batch.BatchID)
+    .input('amount', sql.Int, amountToDeduct)
+    .query(`
+      UPDATE MedicineBatches
+      SET Quantity = Quantity - @amount
+      WHERE BatchID = @batchId
+    `);
+
+  // Reduce remaining order quantity
+  remainingQuantity -= amountToDeduct;
+}
       }
 
       await transaction.commit();
@@ -699,7 +727,7 @@ router.post('/orders', authenticateToken, async (req, res) => {
 router.get('/suppliers', authenticateToken, async (req, res) => {
   try {
     const pool = await getPool();
-    const result = await new sql.Request(transaction).query(`
+    const result = await pool.request().query(`
       SELECT * FROM Suppliers ORDER BY Name
     `);
     res.json(result.recordset);
@@ -715,7 +743,7 @@ router.get('/suppliers', authenticateToken, async (req, res) => {
 router.get('/companies', authenticateToken, async (req, res) => {
   try {
     const pool = await getPool();
-    const result = await new sql.Request(transaction).query(`
+    const result = await pool.request().query(`
       SELECT * FROM Companies ORDER BY Name
     `);
     res.json(result.recordset);
@@ -733,7 +761,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
     const pool = await getPool();
 
     // Get user info
-    const userResult = await new sql.Request(transaction)
+    const userResult = await pool.request()
       .input('userId', sql.Int, req.user.UserID)
       .query(`
         SELECT UserID, Username, Email, FullName, Role
@@ -751,7 +779,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
     // Check if LicenseNumber and OperatingHours columns exist first
     let pharmacyResult;
     try {
-      pharmacyResult = await new sql.Request(transaction)
+      pharmacyResult = await pool.request()
         .input('email', sql.VarChar, user.Email)
         .query(`
           SELECT 
@@ -773,7 +801,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
       // If columns don't exist, try without them
       const errMessage = err.message || '';
       if (errMessage.includes('LicenseNumber') || errMessage.includes('OperatingHours') || errMessage.includes('EstablishedDate') || errMessage.includes('Invalid column name')) {
-        pharmacyResult = await new sql.Request(transaction)
+        pharmacyResult = await pool.request()
           .input('email', sql.VarChar, user.Email)
           .query(`
             SELECT 
@@ -809,7 +837,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
     }
 
     // Get order statistics
-    const statsResult = await new sql.Request(transaction)
+    const statsResult = await pool.request()
       .input('userId', sql.Int, req.user.UserID)
       .query(`
         SELECT 
@@ -836,7 +864,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
     const pool = await getPool();
 
     // Update user info (Owner is stored as FullName in Users table)
-    await new sql.Request(transaction)
+    await pool.request()
       .input('userId', sql.Int, req.user.UserID)
       .input('fullName', sql.VarChar, fullName || null)
       .input('email', sql.VarChar, email || null)
@@ -848,7 +876,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
       `);
 
     // Update pharmacy info if user has associated pharmacy
-    const userResult = await new sql.Request(transaction)
+    const userResult = await pool.request()
       .input('userId', sql.Int, req.user.UserID)
       .query(`SELECT Email FROM Users WHERE UserID = @userId`);
 
@@ -892,7 +920,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
 
 
       // First, verify the pharmacy exists and get its current values
-      const checkPharmacy = await new sql.Request(transaction)
+      const checkPharmacy = await pool.request()
         .input('email', sql.VarChar(100), userEmail)
         .query(`SELECT ID, Name, Email, LicenseNumber, OperatingHours, EstablishedDate FROM Pharmacies WHERE Email = @email`);
 
@@ -903,7 +931,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
 
       // Build the update request with all parameters
       // Use explicit parameter setting to ensure values are passed correctly
-      const updateRequest = new sql.Request(transaction)
+      const updateRequest = pool.request()
         .input('email', sql.VarChar(100), userEmail);
 
       // Add all inputs - use VarChar with explicit lengths matching database schema
@@ -943,7 +971,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
         }
 
         // Immediately verify the update was successful by querying the database
-        const verifyResult = await new sql.Request(transaction)
+        const verifyResult = await pool.request()
           .input('email', sql.VarChar(100), userEmail)
           .query(`
             SELECT ID, Name, Email, LicenseNumber, OperatingHours, EstablishedDate, Address, Phone
@@ -983,7 +1011,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
 router.get('/pharmacies', authenticateToken, async (req, res) => {
   try {
     const pool = await getPool();
-    const result = await new sql.Request(transaction).query(`
+    const result = await pool.request().query(`
       SELECT * FROM Pharmacies ORDER BY Name
     `);
     res.json(result.recordset);
@@ -1031,7 +1059,7 @@ router.get('/offers', authenticateToken, async (req, res) => {
       ORDER BY DiscountPercent DESC, ISNULL(i.MedicineName, m.Name)
     `;
 
-    const result = await new sql.Request(transaction).query(query);
+    const result = await pool.request().query(query);
 
 
     if (!result.recordset || result.recordset.length === 0) {
@@ -1051,7 +1079,7 @@ router.get('/offers', authenticateToken, async (req, res) => {
 router.get('/invoices', authenticateToken, async (req, res) => {
   try {
     const pool = await getPool();
-    const result = await new sql.Request(transaction)
+    const result = await pool.request()
       .input('userId', sql.Int, req.user.UserID)
       .query(`
         SELECT 
@@ -1080,7 +1108,7 @@ router.get('/invoices', authenticateToken, async (req, res) => {
 router.get('/invoices/:id', authenticateToken, async (req, res) => {
   try {
     const pool = await getPool();
-    const result = await new sql.Request(transaction)
+    const result = await pool.request()
       .input('invoiceId', sql.Int, req.params.id)
       .input('userId', sql.Int, req.user.UserID)
       .query(`
@@ -1113,7 +1141,7 @@ router.put('/invoices/:id/payment', authenticateToken, async (req, res) => {
     const pool = await getPool();
 
     // Verify invoice belongs to user
-    const verifyResult = await new sql.Request(transaction)
+    const verifyResult = await pool.request()
       .input('invoiceId', sql.Int, req.params.id)
       .input('userId', sql.Int, req.user.UserID)
       .query(`
@@ -1127,7 +1155,7 @@ router.put('/invoices/:id/payment', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Invoice not found' });
     }
 
-    await new sql.Request(transaction)
+    await pool.request()
       .input('invoiceId', sql.Int, req.params.id)
       .input('paymentStatus', sql.VarChar, paymentStatus || 'Paid')
       .query(`

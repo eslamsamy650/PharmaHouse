@@ -3,10 +3,10 @@ module.exports = {
     {
       name: 'pharmacy-server',
       script: 'server.js',
-      cwd: 'C:\\Users\\Diaa\\Desktop\\Pharmaceutical Warehousing System\\backend',
+      cwd: __dirname,
       watch: false,
       env: {
-        NODE_ENV: 'production',
+        NODE_ENV: 'development',
         PORT: 3000
       }
     }

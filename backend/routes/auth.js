@@ -3,9 +3,10 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const { getPool, sql } = require("../db");
 const { generateToken } = require("../middleware/auth");
+const { registerLimiter, loginLimiter } = require("../middleware/rateLimiters");
 
 // POST /api/auth/register
-router.post("/register", async (req, res) => {
+router.post("/register", registerLimiter, async (req, res) => {
   try {
     const { username, email, password, fullName, role, address, phone } = req.body;
 
@@ -148,7 +149,7 @@ router.post("/register", async (req, res) => {
 });
 
 // POST /api/auth/login
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -211,7 +212,7 @@ router.get("/me", async (req, res) => {
     }
 
     const jwt = require('jsonwebtoken');
-    const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+    const JWT_SECRET = process.env.JWT_SECRET ;
     const decoded = jwt.verify(token, JWT_SECRET);
 
     const pool = await getPool();
@@ -241,7 +242,7 @@ router.put("/change-password", async (req, res) => {
     }
 
     const jwt = require('jsonwebtoken');
-    const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+    const JWT_SECRET = process.env.JWT_SECRET ;
     const decoded = jwt.verify(token, JWT_SECRET);
 
     const { currentPassword, newPassword, confirmPassword } = req.body;
