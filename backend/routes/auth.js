@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const { getPool, sql } = require("../db");
 const { generateToken } = require("../middleware/auth");
-const { registerLimiter, loginLimiter } = require("../middleware/rateLimiters");
+const { registerLimiter, loginLimiter } = require("../middleware/rateLimiter");
 
 // POST /api/auth/register
 router.post("/register", registerLimiter, async (req, res) => {
