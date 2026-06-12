@@ -245,6 +245,12 @@
     .card.success::after {
       background: linear-gradient(90deg, var(--success) 0%, #7bed9f 100%);
     }
+    .card.info::after {
+      background: linear-gradient(90deg, var(--info) 0%, #74b9ff 100%);
+    }
+    .card.loyalty::after {
+      background: linear-gradient(90deg, #8e44ad 0%, #9b59b6 100%);
+    }
     .card.total-medicine::after {
       background: linear-gradient(90deg, var(--medicine-color, #70a1ff) 0%, #1e90ff 100%);
       }
@@ -534,6 +540,8 @@
     .card:nth-child(2) { animation-delay: 0.2s; }
     .card:nth-child(3) { animation-delay: 0.3s; }
     .card:nth-child(4) { animation-delay: 0.4s; }
+    .card:nth-child(5) { animation-delay: 0.5s; }
+    .card:nth-child(6) { animation-delay: 0.6s; }
     
     .quick-action {
       animation: fadeIn 0.6s ease forwards;
@@ -660,6 +668,18 @@
         <div class="value" id="pending-orders">3</div>
         <p>Awaiting delivery</p>
       </div>
+      <div class="card info" id="loyalty-points-card">
+        <i class="fas fa-award icon"></i>
+        <h3>Available Points</h3>
+        <div class="value" id="loyalty-points">0</div>
+        <p>1 EGP = 1 Point</p>
+      </div>
+      <div class="card loyalty" id="total-donations-card">
+        <i class="fas fa-hand-holding-heart icon"></i>
+        <h3>Total Donations</h3>
+        <div class="value" id="total-donations">0</div>
+        <p>From paid invoices</p>
+      </div>
     </div>
 
     <div class="quick-actions">
@@ -749,7 +769,11 @@
 
     async function loadDashboardData() {
       try {
-        const stats = await dashboardAPI.getStats();
+        const [stats, profile, donationStats] = await Promise.all([
+          dashboardAPI.getStats().catch(() => ({})),
+          profileAPI.get().catch(() => ({})),
+          donationsAPI.getStats().catch(() => ({ TotalDonations: 0 }))
+        ]);
         
         // Animate stats (only for visible widgets)
         setTimeout(() => {
@@ -759,6 +783,13 @@
             animateValue('total-meds', stats.totalMeds || 0);
           }
           animateValue('pending-orders', stats.pendingOrders || 0);
+          
+          if (profile.user && profile.user.RewardPoints !== undefined) {
+            animateValue('loyalty-points', profile.user.RewardPoints);
+          }
+          if (donationStats) {
+            animateValue('total-donations', donationStats.TotalDonations || 0);
+          }
         }, 500);
 
         // Render alerts (only for admin users)

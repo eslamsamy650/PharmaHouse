@@ -6,6 +6,65 @@ function getAuthToken() {
   return localStorage.getItem('token');
 }
 
+// Global Toast System
+window.showToast = function(type, message) {
+  let toastContainer = document.getElementById('toast-container');
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.id = 'toast-container';
+    toastContainer.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;';
+    document.body.appendChild(toastContainer);
+  }
+
+  const toast = document.createElement('div');
+  const bgColors = {
+    success: '#4caf50',
+    error: '#f44336',
+    info: '#2196f3',
+    warning: '#ff9800'
+  };
+  const icons = {
+    success: '✅ ',
+    error: '❌ ',
+    info: 'ℹ️ ',
+    warning: '⚠️ '
+  };
+  
+  toast.style.cssText = `
+    background-color: ${bgColors[type] || bgColors.info};
+    color: white;
+    padding: 12px 24px;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    max-width: 350px;
+    word-break: break-word;
+  `;
+  toast.innerHTML = (icons[type] || '') + message;
+
+  toastContainer.appendChild(toast);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+  });
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }, 4000);
+};
+
 // Set auth token in localStorage
 function setAuthToken(token) {
   localStorage.setItem('token', token);
@@ -245,6 +304,13 @@ const invoicesAPI = {
   }
 };
 
+// Donations API
+const donationsAPI = {
+  getStats: async () => {
+    return await apiRequest('/donations/stats');
+  }
+};
+
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -260,8 +326,38 @@ if (typeof module !== 'undefined' && module.exports) {
     pharmaciesAPI,
     offersAPI,
     invoicesAPI,
+    donationsAPI,
     getAuthToken,
     setAuthToken,
     removeAuthToken
   };
 }
+
+// Role-Based UI Navigation
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const userStr = localStorage.getItem('pharmacy');
+    if (!userStr) return;
+    const user = JSON.parse(userStr);
+    const role = user.role || user.Role;
+    
+    if (role === 'admin') {
+      // Hide Orders, Payments, Offers from Admin
+      const style = document.createElement('style');
+      style.innerHTML = `
+        a[href="orders.html"], a[href="payments.html"], a[href="SpecialOffers.html"] { display: none !important; }
+        li:has(a[href="orders.html"]), li:has(a[href="payments.html"]), li:has(a[href="SpecialOffers.html"]) { display: none !important; }
+      `;
+      document.head.appendChild(style);
+    } else if (role === 'pharmacy' || role === 'user') {
+      // Hide Inventory Management modifications from Pharmacy
+      const style = document.createElement('style');
+      style.innerHTML = `
+        #add-item-btn, .btn-edit, .btn-delete, .edit-btn, .delete-btn { display: none !important; }
+      `;
+      document.head.appendChild(style);
+    }
+  } catch (e) {
+    console.error('Error applying role-based UI:', e);
+  }
+});

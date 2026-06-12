@@ -945,6 +945,16 @@
                 <strong>Subtotal:</strong> $<span id="subtotal">0.00</span>
               </div>
               <div class="summary-item">
+                <strong>Redeem Points:</strong>
+                <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
+                  <input type="number" id="redeem-points" class="form-control" style="width: 100px; padding: 0.5rem;" min="0" value="0" oninput="updateOrderSummary()">
+                  <span style="font-size: 0.85rem; color: var(--info);">(Available: <span id="available-points">0</span>)</span>
+                </div>
+              </div>
+              <div class="summary-item" id="points-discount-row" style="display: none;">
+                <strong>Points Discount:</strong> <span style="color: var(--success);">-$<span id="points-discount">0.00</span></span>
+              </div>
+              <div class="summary-item">
                 <strong>Estimated Total:</strong> $<span id="estimated-total">0.00</span>
               </div>
             </div>
@@ -955,8 +965,8 @@
           <button class="btn btn-outline" onclick="clearOrder()">
             <i class="fas fa-trash"></i> Clear Order
           </button>
-          <button class="btn btn-primary" onclick="submitOrder()">
-            <i class="fas fa-paper-plane"></i> Submit Order
+          <button id="submit-order-btn" class="btn btn-primary" onclick="submitOrder()">
+            <i class="fas fa-paper-plane"></i> <span id="submit-order-text">Submit Order</span>
           </button>
         </div>
       </div>
@@ -1037,11 +1047,26 @@
 
     async function loadData() {
       try {
-        [medicinesData, suppliersData, orderHistoryData] = await Promise.all([
-          medicinesAPI.getAll().catch(() => []),
-          suppliersAPI.getAll().catch(() => []),
-          ordersAPI.getAll().catch(() => [])
+        const [[meds, supps, orders], profile] = await Promise.all([
+          Promise.all([
+            medicinesAPI.getAll().catch(() => []),
+            suppliersAPI.getAll().catch(() => []),
+            ordersAPI.getAll().catch(() => [])
+          ]),
+          profileAPI.get().catch(() => ({}))
         ]);
+        medicinesData = meds;
+        suppliersData = supps;
+        orderHistoryData = orders;
+        
+        if (profile && profile.user && profile.user.RewardPoints !== undefined) {
+          availablePoints = profile.user.RewardPoints;
+          document.getElementById('available-points').textContent = availablePoints;
+          const redeemInput = document.getElementById('redeem-points');
+          if (redeemInput) {
+            redeemInput.max = availablePoints;
+          }
+        }
         
         // Populate supplier dropdown
         const supplierSelect = document.getElementById('supplier');
@@ -1099,6 +1124,7 @@
     }
 
     const orderItems = [];
+    let availablePoints = 0;
     let currentOrderTab = 'new-order';
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -1206,7 +1232,7 @@
       const selectedValue = medicineSelect.value;
       
       if (!selectedValue) {
-        alert('Please select a medicine');
+        showToast('warning', 'Please select a medicine');
         return;
       }
       
@@ -1314,12 +1340,40 @@
       let surcharge = 0;
       if (priority === 'urgent') surcharge = subtotal * 0.1;
       if (priority === 'emergency') surcharge = subtotal * 0.2;
-      const estimatedTotal = subtotal + surcharge;
+      
+      let redeemInput = document.getElementById('redeem-points');
+      let redeemedPoints = redeemInput ? parseInt(redeemInput.value) || 0 : 0;
+      
+      if (redeemedPoints < 0) {
+        redeemedPoints = 0;
+        if (redeemInput) redeemInput.value = 0;
+      } else if (redeemedPoints > availablePoints) {
+        redeemedPoints = availablePoints;
+        if (redeemInput) redeemInput.value = availablePoints;
+      }
+      
+      let discount = redeemedPoints;
+      if (discount > subtotal + surcharge) {
+        discount = subtotal + surcharge;
+      }
+      
+      const estimatedTotal = subtotal + surcharge - discount;
       
       document.getElementById('total-items').textContent = totalItems;
       document.getElementById('total-quantity').textContent = totalQuantity;
       document.getElementById('subtotal').textContent = subtotal.toFixed(2);
-      document.getElementById('estimated-total').textContent = estimatedTotal.toFixed(2);
+      document.getElementById('estimated-total').textContent = Math.max(0, estimatedTotal).toFixed(2);
+      
+      const discountRow = document.getElementById('points-discount-row');
+      const discountSpan = document.getElementById('points-discount');
+      if (discountRow && discountSpan) {
+        if (discount > 0) {
+          discountRow.style.display = 'block';
+          discountSpan.textContent = discount.toFixed(2);
+        } else {
+          discountRow.style.display = 'none';
+        }
+      }
     }
 
     document.getElementById('priority').addEventListener('change', updateOrderSummary);
@@ -1342,7 +1396,7 @@
 
     async function submitOrder() {
       if (orderItems.length === 0) {
-        alert('Please add items to the order before submitting');
+        showToast('warning', 'Please add items to the order before submitting');
         return;
       }
       
@@ -1366,6 +1420,23 @@
       if (priority === 'emergency') surcharge = subtotal * 0.2;
       const totalAmount = subtotal + surcharge;
       
+      const submitBtn = document.getElementById('submit-order-btn');
+      const submitText = document.getElementById('submit-order-text');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.7';
+        submitBtn.style.cursor = 'not-allowed';
+      }
+      if (submitText) {
+        submitText.textContent = 'Processing...';
+      }
+      
+      const redeemInput = document.getElementById('redeem-points');
+      let redeemedPoints = redeemInput ? parseInt(redeemInput.value) || 0 : 0;
+      let discount = redeemedPoints;
+      if (discount > totalAmount) discount = totalAmount;
+      const finalTotalAmount = totalAmount - discount;
+
       try {
         const order = {
           PharmacyID: null,
@@ -1375,7 +1446,8 @@
             Quantity: item.quantity,
             UnitPrice: item.unitPrice
           })),
-          TotalAmount: totalAmount
+          TotalAmount: finalTotalAmount,
+          RedeemedPoints: redeemedPoints
         };
         
         const result = await ordersAPI.create(order);
@@ -1397,10 +1469,26 @@
         newDeliveryDate.setDate(today.getDate() + 3);
         document.getElementById('delivery-date').valueAsDate = newDeliveryDate;
         
-        // Redirect to payments page
-        window.location.href = 'payments.html';
+        // Delay redirect so user can read the success toast
+        setTimeout(() => {
+          if (result.isFullyPaid) {
+            showToast('success', 'Order created successfully. Invoice automatically marked as Paid using reward points.');
+            // Reload the page to clear state, but switch to history tab
+            window.location.href = 'orders.html';
+          } else {
+            window.location.href = 'payments.html';
+          }
+        }, 1000);
       } catch (error) {
-        alert('Error submitting order: ' + (error.message || 'Please try again'));
+        showToast('error', 'Error submitting order: ' + (error.message || 'Please try again'));
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+        }
+        if (submitText) {
+          submitText.textContent = 'Submit Order';
+        }
       }
     }
 
@@ -1635,7 +1723,7 @@
           order.status = 'cancelled';
           renderOrderHistory();
           closeModal();
-          alert('Order has been cancelled');
+          showToast('success', 'Order has been cancelled');
         }
       }
     }

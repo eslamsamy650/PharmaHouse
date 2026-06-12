@@ -62,7 +62,7 @@ router.get('/orders', authenticateToken, async (req, res) => {
 // POST /api/orders - Create new order and reduce stock
 router.post('/orders', authenticateToken, async (req, res) => {
   try {
-    const { PharmacyID, SupplierID, items, TotalAmount } = req.body;
+    const { PharmacyID, SupplierID, items, TotalAmount, redeemedPoints } = req.body;
 
     if (!items || items.length === 0) {
       return res.status(400).json({ error: 'Order must contain at least one item' });
@@ -75,13 +75,68 @@ router.post('/orders', authenticateToken, async (req, res) => {
 
     try {
       
+      // Loyalty redemption
+      let finalTotalAmount = TotalAmount;
+      let pointsToRedeem = 0;
+      if (redeemedPoints && redeemedPoints > 0) {
+        const userPointsResult = await transaction.request()
+          .input('checkUserId', sql.Int, req.user.UserID)
+          .query(`SELECT ISNULL(RewardPoints, 0) as RewardPoints FROM Users WHERE UserID = @checkUserId`);
+          
+        const userPoints = userPointsResult.recordset[0].RewardPoints;
+        if (userPoints < redeemedPoints) {
+           await transaction.rollback();
+           return res.status(400).json({ error: 'Insufficient reward points' });
+        }
+        
+        pointsToRedeem = redeemedPoints;
+        const discount = pointsToRedeem * 1; // 1 point = 1 EGP
+        finalTotalAmount = Math.max(0, TotalAmount - discount);
+      }
+
+      // ── STOCK VALIDATION ──────────────────────────────────────────────────
+      // Check EVERY item before writing anything to the database.
+      // If any medicine has insufficient stock, reject the whole order immediately.
+      for (const item of items) {
+        const medicineId = item.MedicineID || item.id;
+        const quantity   = item.Quantity   || item.quantity || 1;
+
+        const stockCheck = await transaction.request()
+          .input('stockMedicineId', sql.Int, medicineId)
+          .query(`
+            SELECT MedicineName, CurrentStock
+            FROM Inventory
+            WHERE MedicineID = @stockMedicineId
+          `);
+
+        // Medicine not found in inventory at all
+        if (stockCheck.recordset.length === 0) {
+          await transaction.rollback();
+          return res.status(400).json({
+            error: `Medicine ID ${medicineId} not found in inventory`
+          });
+        }
+
+        const { MedicineName, CurrentStock } = stockCheck.recordset[0];
+
+        // Not enough stock
+        if (CurrentStock < quantity) {
+          await transaction.rollback();
+          return res.status(400).json({
+            error: `Insufficient stock for "${MedicineName}". ` +
+                   `Requested: ${quantity}, Available: ${CurrentStock}`
+          });
+        }
+      }
+      // ── END STOCK VALIDATION ───────────────────────────────────────────────
+
       // Create order
       const orderResult = await transaction.request()
       .input('UserID', sql.Int, req.user.UserID)
       .input('PharmacyID', sql.Int, PharmacyID || null)
       .input('SupplierID', sql.Int, SupplierID || null)
       .input('OrderDate', sql.Date, new Date())
-      .input('TotalAmount', sql.Decimal(10, 2), TotalAmount)
+      .input('TotalAmount', sql.Decimal(10, 2), finalTotalAmount)
       .query(`
         INSERT INTO Orders (
           UserID,
@@ -119,15 +174,40 @@ router.post('/orders', authenticateToken, async (req, res) => {
           `);
       }
 
-      await transaction.request()
+      const invoiceResult = await transaction.request()
         .input('OrderID', sql.Int, orderId)
         .input('InvoiceDate', sql.Date, new Date())
-        .input('TotalAmount', sql.Decimal(10, 2), TotalAmount)
-        .input('PaymentStatus', sql.VarChar, 'Pending')
+        .input('TotalAmount', sql.Decimal(10, 2), finalTotalAmount)
+        .input('PaymentStatus', sql.VarChar, finalTotalAmount <= 0 ? 'Paid' : 'Pending')
         .query(`
           INSERT INTO Invoices (OrderID, InvoiceDate, TotalAmount, PaymentStatus)
+          OUTPUT INSERTED.InvoiceID
           VALUES (@OrderID, @InvoiceDate, @TotalAmount, @PaymentStatus)
         `);
+
+      const invoiceId = invoiceResult.recordset[0].InvoiceID;
+
+      if (pointsToRedeem > 0) {
+        // Record redemption in ledger
+        await transaction.request()
+          .input('ledgerUserId', sql.Int, req.user.UserID)
+          .input('ledgerOrderId', sql.Int, orderId)
+          .input('pointsRedeemed', sql.Int, pointsToRedeem)
+          .query(`
+            INSERT INTO RewardPoints (UserID, OrderID, PointsRedeemed)
+            VALUES (@ledgerUserId, @ledgerOrderId, @pointsRedeemed)
+          `);
+
+        // Update User's balance
+        await transaction.request()
+          .input('updateUserId', sql.Int, req.user.UserID)
+          .input('deductPoints', sql.Int, pointsToRedeem)
+          .query(`
+            UPDATE Users
+            SET RewardPoints = RewardPoints - @deductPoints
+            WHERE UserID = @updateUserId
+          `);
+      }
 
       // Reduce stock from Inventory and MedicineBatches
       for (const item of items) {
@@ -201,7 +281,8 @@ router.post('/orders', authenticateToken, async (req, res) => {
         message: 'Order created successfully',
         orderId,
         invoiceId,
-        redirectTo: '/payments.html'
+        isFullyPaid: finalTotalAmount <= 0,
+        redirectTo: finalTotalAmount <= 0 ? '/orders.html' : '/payments.html'
       });
     } catch (err) {
       await transaction.rollback();

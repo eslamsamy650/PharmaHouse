@@ -14,7 +14,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
     const userResult = await pool.request()
       .input('userId', sql.Int, req.user.UserID)
       .query(`
-        SELECT UserID, Username, Email, FullName, Role
+        SELECT UserID, Username, Email, FullName, Role, ISNULL(RewardPoints, 0) AS RewardPoints
         FROM Users
         WHERE UserID = @userId
       `);

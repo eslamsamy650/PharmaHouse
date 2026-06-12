@@ -75,7 +75,7 @@ router.put('/invoices/:id/payment', authenticateToken, async (req, res) => {
       .input('invoiceId', sql.Int, req.params.id)
       .input('userId', sql.Int, req.user.UserID)
       .query(`
-        SELECT i.InvoiceID, i.PaymentStatus, i.TotalAmount
+        SELECT i.InvoiceID, i.PaymentStatus, i.TotalAmount, o.OrderID
         FROM Invoices i
         INNER JOIN Orders o ON i.OrderID = o.OrderID
         WHERE i.InvoiceID = @invoiceId AND o.UserID = @userId
@@ -130,8 +130,31 @@ router.put('/invoices/:id/payment', authenticateToken, async (req, res) => {
             VALUES (@invoiceId, @donationAmount)
           `);
 
+        // Loyalty: Award points for paid invoice (1 EGP = 1 Point)
+        const pointsEarned = Math.floor(totalAmount);
+        const orderId = verifyResult.recordset[0].OrderID;
+        const userId = req.user.UserID;
+
+        await transaction.request()
+          .input('userId', sql.Int, userId)
+          .input('orderId', sql.Int, orderId)
+          .input('pointsEarned', sql.Int, pointsEarned)
+          .query(`
+            INSERT INTO RewardPoints (UserID, OrderID, PointsEarned)
+            VALUES (@userId, @orderId, @pointsEarned)
+          `);
+
+        await transaction.request()
+          .input('userId', sql.Int, userId)
+          .input('pointsEarned', sql.Int, pointsEarned)
+          .query(`
+            UPDATE Users 
+            SET RewardPoints = ISNULL(RewardPoints, 0) + @pointsEarned 
+            WHERE UserID = @userId
+          `);
+
         await transaction.commit();
-        return res.json({ message: 'Payment status updated and donation recorded successfully' });
+        return res.json({ message: 'Payment status updated, donation recorded, and points awarded successfully' });
       } catch (err) {
         await transaction.rollback();
         throw err;

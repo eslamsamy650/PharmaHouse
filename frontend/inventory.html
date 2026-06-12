@@ -648,6 +648,7 @@
   <div class="barcode-scanner" id="barcode-scanner">
     <div class="scanner-container">
       <h2>Scan Barcode</h2>
+      <p style="color: var(--warning); font-size: 0.85rem; font-style: italic; margin-bottom: 1rem;"><i class="fas fa-info-circle"></i> Demo Mode: This scanner uses mock barcode data for demonstration purposes.</p>
       <video class="scanner-video" id="scanner-video"></video>
       <button class="btn btn-primary" onclick="startScan()">
         <i class="fas fa-play"></i> Start Scan
@@ -1164,7 +1165,13 @@
       // Handle form submission
       form.querySelector('#add-inventory-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        await addInventoryItem();
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Saving...'; }
+        try {
+          await addInventoryItem();
+        } finally {
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Save'; }
+        }
       });
       
       // Close on backdrop click
@@ -1256,7 +1263,13 @@
       // Handle form submission
       form.querySelector('#edit-inventory-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        await updateInventoryItem(medicineId);
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Saving...'; }
+        try {
+          await updateInventoryItem(medicineId);
+        } finally {
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Save'; }
+        }
       });
       
       // Close on backdrop click
@@ -1278,7 +1291,7 @@
         const supplierId = document.getElementById('add-supplier-id').value;
         
         if (!medicineName) {
-          alert('Please fill in Medicine Name (required field).');
+          showToast('warning', 'Please fill in Medicine Name (required field).');
           return;
         }
         
@@ -1297,12 +1310,12 @@
         };
         
         await inventoryAPI.create(inventoryData);
-        alert('Inventory item added successfully!');
+        showToast('success', 'Inventory item added successfully!');
         window.closeInventoryModal();
         await loadInventory();
       } catch (error) {
         console.error('Error adding inventory:', error);
-        alert('Error adding inventory: ' + (error.message || 'Please try again'));
+        showToast('error', 'Error adding inventory: ' + (error.message || 'Please try again'));
       }
     }
     
@@ -1317,7 +1330,7 @@
         const supplierId = document.getElementById('edit-supplier-id').value;
         
         if (!medicineName) {
-          alert('Medicine Name is required');
+          showToast('warning', 'Medicine Name is required');
           return;
         }
         
@@ -1336,11 +1349,11 @@
         };
         
         await inventoryAPI.update(medicineId, inventoryData);
-        alert('Inventory item updated successfully!');
+        showToast('success', 'Inventory item updated successfully!');
         window.closeInventoryModal();
         await loadInventory();
       } catch (error) {
-        alert('Error updating inventory: ' + (error.message || 'Please try again'));
+        showToast('error', 'Error updating inventory: ' + (error.message || 'Please try again'));
       }
     }
     
@@ -1352,10 +1365,10 @@
       
       try {
         await inventoryAPI.delete(medicineId);
-        alert('Inventory item deleted successfully!');
+        showToast('success', 'Inventory item deleted successfully!');
         await loadInventory();
       } catch (error) {
-        alert('Error deleting inventory: ' + (error.message || 'Please try again'));
+        showToast('error', 'Error deleting inventory: ' + (error.message || 'Please try again'));
       }
     };
     

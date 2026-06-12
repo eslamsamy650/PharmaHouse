@@ -1559,11 +1559,11 @@
         
         try {
           await profileAPI.update(updateData);
-          alert('Profile updated successfully!');
+          showToast('success', 'Profile updated successfully!');
           modal.remove();
           loadProfile();
         } catch (error) {
-          alert('Error updating profile: ' + (error.message || 'Please try again'));
+          showToast('error', 'Error updating profile: ' + (error.message || 'Please try again'));
         }
       });
     }
@@ -1747,6 +1747,39 @@
     // Load user role and profile on page load
     loadUserRole();
     loadProfile();
+  </script>
+
+  <script>
+    // Role-based terminology update
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const userStr = localStorage.getItem('pharmacy');
+        if (!userStr) return;
+        const user = JSON.parse(userStr);
+        if (user.role === 'admin' || user.Role === 'admin') {
+          document.title = 'PharmaCare | Admin Profile';
+          
+          const h1 = document.querySelector('.page-header h1');
+          if (h1 && h1.textContent.includes('Pharmacy Profile')) {
+            h1.textContent = 'System Admin Profile';
+          }
+          
+          const h2s = document.querySelectorAll('h2');
+          h2s.forEach(h2 => {
+            if (h2.textContent.includes('Edit Pharmacy Profile')) {
+              h2.textContent = 'Edit Admin Profile';
+            }
+          });
+          
+          const activeLink = document.querySelector('.sidebar-menu li.active a');
+          if (activeLink && activeLink.textContent.includes('Pharmacy Profile')) {
+            activeLink.innerHTML = '<i class="fas fa-user-shield"></i> Admin Profile';
+          }
+        }
+      } catch (e) {
+        console.error('Error applying admin profile terminology:', e);
+      }
+    });
   </script>
 </body>
 </html>

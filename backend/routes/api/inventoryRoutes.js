@@ -111,7 +111,7 @@ router.post('/inventory', authenticateToken, async (req, res) => {
       await pool.request()
         .input('ID', sql.Int, finalMedicineID)
         .input('Name', sql.VarChar(100), MedicineName)
-        .input('Description', sql.Text, `Inventory item: ${MedicineName}`)
+        .input('Description', sql.VarChar(sql.MAX), `Inventory item: ${MedicineName}`)
         .input('CompanyID', sql.Int, defaultCompanyID)
         .input('Price', sql.Decimal(10, 2), medicinePrice)
         .query(`
@@ -146,6 +146,25 @@ router.post('/inventory', authenticateToken, async (req, res) => {
           INSERT (MedicineID, MedicineName, Category, CurrentStock, ExpiryDate, Status, TotalQuantity, SupplierID)
           VALUES (@MedicineID, @MedicineName, @Category, @CurrentStock, @ExpiryDate, @Status, @TotalQuantity, @SupplierID);
       `);
+
+    // Ensure MedicineSuppliers table is updated to link the medicine to the supplier
+    if (SupplierID) {
+      const medicinePrice = Price != null && Price !== '' && !isNaN(parseFloat(Price)) ? parseFloat(Price) : 0.00;
+      await pool.request()
+        .input('MedicineID', sql.Int, finalMedicineID)
+        .input('SupplierID', sql.Int, SupplierID)
+        .input('Price', sql.Decimal(10, 2), medicinePrice)
+        .query(`
+          MERGE MedicineSuppliers AS target
+          USING (SELECT @MedicineID AS MedicineID, @SupplierID AS SupplierID) AS source
+          ON target.MedicineID = source.MedicineID AND target.SupplierID = source.SupplierID
+          WHEN MATCHED THEN
+            UPDATE SET SupplyPrice = @Price
+          WHEN NOT MATCHED THEN
+            INSERT (MedicineID, SupplierID, SupplyPrice)
+            VALUES (@MedicineID, @SupplierID, @Price);
+        `);
+    }
 
     res.status(201).json({ 
       message: 'Inventory item added/updated successfully',
@@ -209,12 +228,30 @@ router.put('/inventory/:id', authenticateToken, async (req, res) => {
         WHERE MedicineID = @MedicineID
       `);
 
-    const medicinePrice = Price != null && Price !== '' && !isNaN(parseFloat(Price)) ? parseFloat(Price) : null;
-    if (medicinePrice !== null) {
+    const medicinePrice = Price != null && Price !== '' && !isNaN(parseFloat(Price)) ? parseFloat(Price) : 0.00;
+    if (medicinePrice !== 0.00) {
       await pool.request()
         .input('medicineId', sql.Int, medicineId)
         .input('Price', sql.Decimal(10, 2), medicinePrice)
         .query(`UPDATE Medicines SET Price = @Price WHERE ID = @medicineId`);
+    }
+
+    // Ensure MedicineSuppliers table is updated to link the medicine to the supplier
+    if (SupplierID) {
+      await pool.request()
+        .input('MedicineID', sql.Int, medicineId)
+        .input('SupplierID', sql.Int, SupplierID)
+        .input('Price', sql.Decimal(10, 2), medicinePrice)
+        .query(`
+          MERGE MedicineSuppliers AS target
+          USING (SELECT @MedicineID AS MedicineID, @SupplierID AS SupplierID) AS source
+          ON target.MedicineID = source.MedicineID AND target.SupplierID = source.SupplierID
+          WHEN MATCHED THEN
+            UPDATE SET SupplyPrice = @Price
+          WHEN NOT MATCHED THEN
+            INSERT (MedicineID, SupplierID, SupplyPrice)
+            VALUES (@MedicineID, @SupplierID, @Price);
+        `);
     }
 
     res.json({ message: 'Inventory item updated successfully' });

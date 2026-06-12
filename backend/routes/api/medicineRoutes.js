@@ -110,7 +110,7 @@ router.post('/medicines', authenticateToken, async (req, res) => {
     await pool.request()
       .input('ID', sql.Int, ID)
       .input('Name', sql.VarChar, Name)
-      .input('Description', sql.Text, Description || null)
+      .input('Description', sql.VarChar(sql.MAX), Description || null)
       .input('CompanyID', sql.Int, CompanyID)
       .input('ProductionDate', sql.Date, ProductionDate || null)
       .input('ExpiryDate', sql.Date, ExpiryDate || null)

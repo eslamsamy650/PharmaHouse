@@ -1,18 +1,17 @@
-const sql = require('mssql');
+const sql = require('mssql/msnodesqlv8');
 require('dotenv').config();
 
 const config = {
-  user: process.env.DB_USER ,
-  password: process.env.DB_PASSWORD ,
   server: process.env.DB_SERVER ,
   database: process.env.DB_NAME ,
+  driver: 'ODBC Driver 17 for SQL Server',
   options: {
     trustServerCertificate: true,
-    encrypt: false
+    encrypt: false,
+    trustedConnection: true // Needed for Integrated Security
   },
   connectionTimeout: 30000,
   requestTimeout: 30000,
-  port: parseInt(process.env.DB_PORT) || 1433,
   pool: {
     max: 10,
     min: 0,

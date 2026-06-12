@@ -685,6 +685,16 @@
         <div class="payment-details">
           <h2>Payment Details</h2>
           <div id="credit-card-form">
+            <div style="background-color: #e8f4fd; border-left: 4px solid #2196f3; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+              <h4 style="margin-top: 0; color: #0c5460;">Demo Payment Environment</h4>
+              <p style="margin-bottom: 5px; font-size: 0.9em;">Use the following simulated cards for testing:</p>
+              <ul style="margin: 0; padding-left: 20px; font-size: 0.9em; font-family: monospace;">
+                <li>VISA: 4111111111111111</li>
+                <li>MC: 5555555555554444</li>
+                <li>CVV: 123</li>
+                <li>Expiry: Any future date</li>
+              </ul>
+            </div>
             <div class="form-group">
               <label for="card-number">Card Number</label>
               <input type="text" id="card-number" class="form-control" placeholder="1234 5678 9012 3456">
@@ -750,8 +760,8 @@
             </div>
           </div>
           <div class="payment-actions" style="margin-top: 1.5rem; text-align: center;">
-  <button class="btn btn-primary" style="color: #6c5ce7; width: 50%; margin:auto" onclick="processPayment()">
-    <i class="fas fa-lock"></i> Confirm Payment
+  <button id="process-payment-btn" class="btn btn-primary" style="color: #fff; width: 50%; margin:auto" onclick="processPayment()">
+    <i class="fas fa-lock"></i> <span id="process-payment-text">Confirm Payment</span>
   </button>
 </div>
 
@@ -1028,7 +1038,7 @@
 
     async function processPayment() {
       if (!pendingOrder && !pendingInvoiceId) {
-        alert('No order selected for payment');
+        showToast('warning', 'No order selected for payment');
         return;
       }
       
@@ -1042,13 +1052,20 @@
         const expiryDate = document.getElementById('expiry-date').value;
         const cvv = document.getElementById('cvv').value;
         
-        if (!cardNumber || !cardName || !expiryDate || !cvv) {
+        const cardNumberStr = cardNumber.replace(/\s+/g, '');
+        if (!cardNumberStr || !cardName || !expiryDate || !cvv) {
           isValid = false;
-          alert('Please fill all credit card details');
+          showToast('warning', 'Please fill all credit card details');
+        } else if (cardNumberStr.length !== 16 || isNaN(cardNumberStr)) {
+          isValid = false;
+          showToast('warning', 'Please enter a valid 16-digit Card Number');
+        } else if (cvv.length !== 3 || isNaN(cvv)) {
+          isValid = false;
+          showToast('warning', 'Please enter a valid 3-digit CVV');
         } else {
           paymentDetails = {
             method: 'credit-card',
-            cardLast4: cardNumber.slice(-4),
+            cardLast4: cardNumberStr.slice(-4),
             cardName
           };
           paymentMethod = 'Credit Card';
@@ -1059,7 +1076,7 @@
         
         if (!provider || !mobileNumber) {
           isValid = false;
-          alert('Please select mobile provider and enter your number');
+          showToast('warning', 'Please select mobile provider and enter your number');
         } else {
           paymentDetails = {
             method: 'mobile-money',
@@ -1075,6 +1092,17 @@
       
       if (!isValid) return;
       
+      const submitBtn = document.getElementById('process-payment-btn');
+      const submitText = document.getElementById('process-payment-text');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.7';
+        submitBtn.style.cursor = 'not-allowed';
+      }
+      if (submitText) {
+        submitText.textContent = 'Processing...';
+      }
+      
       try {
         // Use pendingInvoiceId if available, otherwise find invoice
         let invoiceId = pendingInvoiceId;
@@ -1085,7 +1113,13 @@
         }
         
         if (!invoiceId) {
-          alert('Invoice not found for this order');
+          showToast('error', 'Invoice not found for this order');
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+          }
+          if (submitText) submitText.textContent = 'Process Payment';
           return;
         }
         
@@ -1105,13 +1139,41 @@
         localStorage.removeItem('pendingOrderId');
         localStorage.removeItem('pendingInvoiceId');
         
-        alert('Payment completed successfully!');
+        showToast('success', 'Demo Payment Processed Successfully. Invoice marked as Paid. Donation generated. Reward points awarded.');
+        
+        // Refresh profile to get updated points
+        try {
+          if (typeof profileAPI !== 'undefined') {
+            const profile = await profileAPI.get();
+            if (profile && profile.user) {
+              localStorage.setItem('pharmacy', JSON.stringify(profile.user));
+            }
+          }
+        } catch (e) {
+          console.error('Failed to refresh profile', e);
+        }
         
         // Reload invoices and switch to history tab
         await loadInvoices();
         showPaymentTab('payment-history');
       } catch (error) {
-        alert('Error processing payment: ' + (error.message || 'Please try again'));
+        const errorMsg = error.message || '';
+        if (errorMsg.toLowerCase().includes('paid') || errorMsg.includes('409') || errorMsg.toLowerCase().includes('already')) {
+          showToast('info', 'This invoice has already been paid.');
+        } else {
+          showToast('error', 'Error processing payment: ' + (errorMsg || 'Please try again'));
+        }
+      } finally {
+        const submitBtn = document.getElementById('process-payment-btn');
+        const submitText = document.getElementById('process-payment-text');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+        }
+        if (submitText) {
+          submitText.textContent = 'Confirm Payment';
+        }
       }
     }
 
